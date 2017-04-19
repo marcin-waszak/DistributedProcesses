@@ -16,6 +16,7 @@
 \usepackage{longtable}
 \usepackage{chngcntr}
 \usepackage{sectsty} % Allows customizing section commands
+\usepackage{float}
 \allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
 \setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
 \usepackage[colorinlistoftodos]{todonotes}
@@ -146,7 +147,7 @@ Podgląd danych statystycznych & Administrator &
 
 \section*{Wybrane środowisko sprzętowo-programowe} 
 \begin{enumerate}
-\item Wspierany system operacyjny: \textit{\textbf{Linux}}.
+\item System operacyjny: \textit{\textbf{GNU/Linux}}.
 \item Język: \textit{\textbf{C++}}.
 \item Biblioteki: STL, boost/filesystem, boost/process, BSD Sockets API.
 \item Testowanie: boost/test.
@@ -154,8 +155,13 @@ Podgląd danych statystycznych & Administrator &
 \item Budowanie: cmake
 \end{enumerate}
 
-\section*{Architektura rozwiązania} 
-------> w tym miejscu rysunek <------ \\
+\section*{Architektura rozwiązania}
+\begin{figure}[H]
+    \centering
+    \def\svgwidth{0.5\columnwidth}
+    \input{image.pdf_tex}
+    \caption{Ilustracja systemu}\label{visina8}
+\end{figure}
 \textbf{\textit{Węzeł worker}} - maszyna, która wykonuje procesy. Bezpośrednia kontrola procesów jest sprawowana przez procesy sieciowe klasy worker.\\
 \textbf{\textit{Proces klasy worker}}- specjalny proces sieciowy na maszynach węzłów worker. Jego zadaniem jest zarządzanie procesami na tych maszynach według rozkazów serwera zarządzającego.\\
 \textbf{\textit{Watchdog}} - specjalny proces obok procesu workera. Stanowi zabezpieczenie przed skutkami zawieszenia procesu workera. \\
