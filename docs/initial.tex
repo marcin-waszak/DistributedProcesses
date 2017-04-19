@@ -73,7 +73,11 @@ Implementowany system ma umożliwiać:
 \end{itemize}
 
 \subsection*{Założenia niefunkcjonalne}
-
+\begin{itemize}
+\item niezawodność komunikacji dzięki użyciu protokołu TCP
+\item funkcja watchdoga chroniącego przed zawieszaniu się agenta
+\item intuicyjna obsługa dzięki zastosowaniu poleceń z poziomu konsoli
+\end{itemize}
 
 
 \section*{Podstawowe przypadki użycia}
@@ -186,12 +190,43 @@ Planowane aplikacje sieciowe do wykonania:
 \section*{Sposób testowania} 
 Planujemy użyć testów jednostkowych w poszczególnych aplikacjach naszego projektu, żeby sprawdzić poprawność działania osobnych części całego systemu. Poza testami jednostkowymi napisane będą również testy integracyjne. Przewidujemy rownież testowanie ręczne. Scenariusze testów akceptacyjnych są przedstawione poniżej.
 
+\newpage
 \section*{Scenariusze testów akceptacyjnych}
+Testy akceptacyjne będą polegały na wykonywaniu różnych scenariuszy użycia.
+
+\begin{longtable}{ |m{4.0cm}|m{5.5cm}|m{6.0cm}|}
+ \caption{Przykładowe scenariusze testów akceptacyjnych}\\
+ \hline
+CEL TESTU & OPIS PRZEBIEGU & OCZEKIWANY WYNIK \\
+ \hline
+ \endfirsthead
+ \multicolumn{3}{c}%
+{\tablename\ \thetable\ -- \textit{Kontynuacja z poprzedniej strony}} \\
+\hline
+ CEL TESTU & OPIS PRZEBIEGU & OCZEKIWANY WYNIK\\
+ \hline
+ \endhead
+ \hline \multicolumn{3}{r}{\textit{Kontynuacja na następnej stronie}} \\
+ \endfoot
+ \hline
+ \endlastfoot
+ Usuwanie obrazu procesu & Administrator przegląda listę procesów. Wpisuje polecenie do usunięcia procesu oraz jego id. & 
+Jeśli podane id istnieje, obraz procesu zostanie usunięty, w przeciwnym przypadku pojawi się komunikat o braku danego procesu. \\
+ \hline
+ Zatrzymanie uruchomionego procesu & Administrator wpisuje polecenie zatrzymania procesu. & Administrator otrzymuje informację o zatrzymaniu procesu.Proces jest widoczny na liście procesów jako załadowany (nie uruchomiony). Jeśli proces nie został jeszcze uruchomiony administrator otrzymuje informację o błędzie. \\
+ \hline
+ Załadowanie obrazu procesu & Administrator wpisuje polecenie załadowania nowego obrazu procesu. & Informacja o stanie załadowania procesu - sukces lub nieudane załadowanie, wraz ze wskazaniem przyczyn niepowodzenia w wykonaniu polecenia. \\
+ \hline
+ Podgląd harmonogramu procesów & Administrator wpisuje polecenie przeglądu procesów. & Wyświetlona lista procesów wraz z ich planowanymi czasami uruchomienia. \\
+ \hline
+ Podgląd danych statystycznych & Administrator wpisuje polecenie służące do podglądu danych statystycznych serwera. & Wyświetlone zostaną informacje o obciążeniu węzłów, liczbie uruchomionych procesów, liczbie załadowanych procesów etc.\\
+  \hline
+\end{longtable}
 \section*{Podział prac w zespole}
-Damian: projekt architektury \\
-Michał: projekt architektury \\
-Agata: projekt architektury, dokumentacja, testowanie, moduł Wireshark \\
-Marcin: team-leader, projekt architektury \\
+\textbf{Damian:} projekt architektury \\
+\textbf{Michał:} projekt architektury \\
+\textbf{Agata:} projekt architektury, dokumentacja, testowanie, moduł Wireshark \\
+\textbf{Marcin:} team-leader, projekt architektury \\
 
 Powyższy podział jest zgrubny. Bowiem szczegółowe przydzielanie prac zorganizowane zostało za pomocą systemu tasków na platformie GitHub.
 

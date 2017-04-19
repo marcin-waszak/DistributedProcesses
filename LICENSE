@@ -1,4 +1,4 @@
-                    GNU GENERAL PUBLIC LICENSE
+﻿                    GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
@@ -631,11 +631,11 @@ to attach them to the start of each source file to most effectively
 state the exclusion of warranty; and each file should have at least
 the "copyright" line and a pointer to where the full notice is found.
 
-    {Distributed Processes. System supports managing of distribute processes: 
+ Distributed processes management system. System supports: 
     input and remove the code of a new process, 
     run/pause/kill process according to its timetable, etc. 
-    System is able to work in IPv4 and IPv6.}
-    Copyright (C) {2017}  {Damian Bułak, Michał Sypetkowski, Agata Walukiewicz, Marcin Waszak}
+    System is able to work in IPv4 and IPv6.
+    Copyright (C) 2017  D. Bułak, M. Sypetkowski, A. Walukiewicz, M. Waszak}
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -655,8 +655,7 @@ Also add information on how to contact you by electronic and paper mail.
   If the program does terminal interaction, make it output a short
 notice like this when it starts in an interactive mode:
 
-    {Distributed Processes}  Copyright (C) {2017}  {System supporting managament 
-    of distribute processes}
+    Distributed processes management system  Copyright (C) 2017  System is supporting managament of distribute processes
     This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
     This is free software, and you are welcome to redistribute it
     under certain conditions; type `show c' for details.
