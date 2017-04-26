@@ -10,14 +10,16 @@ using std::endl;
 using std::string;
 
 int main(int argc, char* argv[]) {
+    // TODO: implement properly
 
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "print help message")
         ("list-workers,l", "list workers")
+        ("server-addr", po::value<string>(), "server address (ipv4 or ipv6)")
     ;
     po::positional_options_description pd;
-    pd.add("input-file", 1);
+    pd.add("server-addr", 1);
 
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).
@@ -30,7 +32,12 @@ int main(int argc, char* argv[]) {
     }
 
     if (vm.count("list-workers")) {
-        AdminServerConnection conn;
+        if (!vm.count("server-addr")) {
+            std::cerr << "Server address not given." << endl;
+            return 1;
+        }
+        string serverAddr = vm["server-addr"].as<string>();
+        AdminServerConnection conn(serverAddr);
         std::cout << "Workers count " << conn.getWorkers().size() << endl;
         return 0;
     }
