@@ -1,0 +1,1 @@
+add_library(AdminServerConnection adminServerConnection.h adminServerConnection.cpp)
