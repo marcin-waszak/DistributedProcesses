@@ -1,2 +1,2 @@
-add_library(AdminServerConnection adminServerConnection.h adminServerConnection.cpp)
-add_library(Worker worker.h worker.cpp)
+add_library(AdminServerConnection AdminServerConnection.h AdminServerConnection.cpp)
+add_library(Worker Worker.h Worker.cpp)

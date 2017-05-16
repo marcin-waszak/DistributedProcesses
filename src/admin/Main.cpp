@@ -1,4 +1,4 @@
-#include "adminServerConnection.h"
+#include "AdminServerConnection.h"
 
 #include <boost/program_options.hpp>
 
@@ -17,8 +17,7 @@ int main(int argc, char* argv[]) {
         ("help,h", "print help message")
         ("list-workers,l", "list workers")
         ("server-addr", po::value<string>(), "server address (ipv4 or ipv6)")
-        ("server-port,p", po::value<int>()->default_value(1100), "server port")
-    ;
+        ("server-port,p", po::value<int>()->default_value(1100), "server port");
     po::positional_options_description pd;
     pd.add("server-addr", 1);
 
@@ -38,9 +37,9 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         string serverAddr = vm["server-addr"].as<string>();
-        int serverPort = vm["server-port"].as<int>();
-        AdminServerConnection conn(serverAddr, serverPort);
-        std::cout << "Workers count " << conn.getWorkers().size() << endl;
+        int server_port = vm["server-port"].as<int>();
+        AdminServerConnection connection(serverAddr, server_port);
+        std::cout << "Workers count " << connection.GetWorkers().size() << endl;
         return 0;
     }
 

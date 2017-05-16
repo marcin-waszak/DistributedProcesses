@@ -1,1 +1,1 @@
-add_library(Connection connection.h connection.cpp)
+add_library(Connection Connection.h Connection.cpp)

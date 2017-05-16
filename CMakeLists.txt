@@ -8,8 +8,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
 
 # Executables
-add_executable (admin "${PROJECT_SOURCE_DIR}/src/admin/main.cpp")
-add_executable (server "${PROJECT_SOURCE_DIR}/src/server/main.cpp")
+add_executable (admin "${PROJECT_SOURCE_DIR}/src/admin/Main.cpp")
+add_executable (server "${PROJECT_SOURCE_DIR}/src/server/Main.cpp")
 target_link_libraries(admin AdminServerConnection)
 target_link_libraries(admin Connection)
 target_link_libraries (admin boost_program_options)

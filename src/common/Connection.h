@@ -6,14 +6,13 @@
 using std::string;
 
 class Connection {
-    struct sockaddr_in sa;
-    int res;
-    int SocketFD;
+    struct sockaddr_in sa_;
+    int socked_fd_;
 
 public:
     Connection(int fd);
     Connection(const string& addr,int port);
     ~Connection();
-    string recvMsg();
-    void sendMsg(const string&);
+    string RecvMsg();
+    void SendMsg(const string &msg);
 };

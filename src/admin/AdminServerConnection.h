@@ -1,6 +1,6 @@
 #pragma once
-#include "worker.h"
-#include "../common/connection.h"
+#include "Worker.h"
+#include "../common/Connection.h"
 
 #include <vector>
 #include <memory>
@@ -11,5 +11,5 @@ using std::shared_ptr;
 class AdminServerConnection : Connection{
 public:
     AdminServerConnection(const string&, int port);
-    vector<shared_ptr<Worker>> getWorkers();
+    vector<shared_ptr<Worker>> GetWorkers();
 };

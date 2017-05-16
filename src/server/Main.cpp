@@ -1,4 +1,4 @@
-#include "../common/connection.h"
+#include "../common/Connection.h"
 
 #include <boost/program_options.hpp>
 
@@ -18,14 +18,14 @@ using std::cout;
 using std::endl;
 using std::string;
 
-bool serverListenTest(unsigned port) {
+bool ServerListenTest(unsigned port) {
     /*
     * This is temporary implementation of server for debugging
     * TODO: implement properly
     * */
     struct sockaddr_in sa;
-    int SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (SocketFD == -1) {
+    int socket_fd_ = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (socket_fd_ == -1) {
         perror("cannot create socket");
         return false;
     }
@@ -36,39 +36,39 @@ bool serverListenTest(unsigned port) {
     sa.sin_port = htons(port);
     sa.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    if (bind(SocketFD,(struct sockaddr *)&sa, sizeof sa) == -1) {
+    if (bind(socket_fd_,(struct sockaddr *)&sa, sizeof sa) == -1) {
         perror("bind failed");
-        close(SocketFD);
+        close(socket_fd_);
         return false;
     }
 
-    if (listen(SocketFD, 10) == -1) {
+    if (listen(socket_fd_, 10) == -1) {
         perror("listen failed");
-        close(SocketFD);
+        close(socket_fd_);
         return false;
     }
 
     for (;;) {
-        int ConnectFD = accept(SocketFD, NULL, NULL);
+        int connect_fd_ = accept(socket_fd_, NULL, NULL);
 
         printf("new client \n");
 
-        if (0 > ConnectFD) {
+        if (0 > connect_fd_) {
             perror("accept failed");
-            close(SocketFD);
+            close(socket_fd_);
             continue;
         }
 
         // Example behavior
-        Connection c(ConnectFD);
-        string msg = c.recvMsg();
+        Connection connection(connect_fd_);
+        string msg = connection.RecvMsg();
         std::cout<< "got command: " << msg << std::endl;
         string exampleResponse = "123";
         std::cout<< "responding: " << exampleResponse << std::endl;
-        c.sendMsg(exampleResponse);
+        connection.SendMsg(exampleResponse);
     }
 
-    close(SocketFD);
+    close(socket_fd_);
     return true;
 }
 
@@ -76,8 +76,7 @@ int main(int argc, char* argv[]) {
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "print help message")
-        ("port,p", po::value<int>()->default_value(1100), "Port to listen at")
-    ;
+        ("port,p", po::value<int>()->default_value(1100), "Port to listen at");
     po::positional_options_description pd;
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).
@@ -90,11 +89,11 @@ int main(int argc, char* argv[]) {
     }
     int port = vm["port"].as<int>();
 
-    if (serverListenTest(port))  {
+    if (ServerListenTest(port))  {
         cout << "Closing server" << endl;
         return 0;
     } else {
-        cout << "Rerver run failed" << endl;
+        cout << "Server run failed" << endl;
         return 1;
     }
 
