@@ -39,7 +39,10 @@ Connection::Connection(const string& addr, int port) {
     std::cout << "Connecting to: " << addr << std::endl;
     if (connect(socked_fd_, (struct sockaddr *)&sa_, sizeof sa_) == -1) {
         perror("connect failed");
-        close(socked_fd_);
+
+        if(close(socked_fd_) == -1)
+            perror("close failed");
+
         exit(EXIT_FAILURE);
     }
 }
@@ -49,7 +52,9 @@ Connection::~Connection() {
     if (shutdown(socked_fd_, SHUT_RDWR) == -1) {
         perror("shutdown failed");
     }
-    close(socked_fd_);
+
+    if(close(socked_fd_) == -1)
+        perror("close failed");
 }
 
 string Connection::RecvMsg() {

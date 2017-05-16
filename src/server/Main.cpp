@@ -38,13 +38,19 @@ bool ServerListenTest(unsigned port) {
 
     if (bind(socket_fd_,(struct sockaddr *)&sa, sizeof sa) == -1) {
         perror("bind failed");
-        close(socket_fd_);
+
+        if(close(socket_fd_) == -1)
+            perror("close failed");
+
         return false;
     }
 
     if (listen(socket_fd_, 10) == -1) {
         perror("listen failed");
-        close(socket_fd_);
+
+        if(close(socket_fd_) == -1)
+            perror("close failed");
+
         return false;
     }
 
@@ -55,7 +61,10 @@ bool ServerListenTest(unsigned port) {
 
         if (0 > connect_fd_) {
             perror("accept failed");
-            close(socket_fd_);
+
+            if(close(socket_fd_) == -1)
+                perror("close failed");
+
             continue;
         }
 
@@ -68,7 +77,9 @@ bool ServerListenTest(unsigned port) {
         connection.SendMsg(exampleResponse);
     }
 
-    close(socket_fd_);
+    if(close(socket_fd_) == -1)
+        perror("close failed");
+
     return true;
 }
 
