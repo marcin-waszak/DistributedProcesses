@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ProcessImage.h"
+
 #include <string>
 #include <netinet/in.h>
 
@@ -15,4 +17,7 @@ public:
     ~Connection();
     string RecvMsg();
     void SendMsg(const string &msg);
+
+    void SendProcessImage(const ProcessImage&);
+    ProcessImage RecvProcessImage(fs::path targetFileLocation);
 };

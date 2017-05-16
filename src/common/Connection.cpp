@@ -58,13 +58,42 @@ Connection::~Connection() {
 }
 
 string Connection::RecvMsg() {
-    // TODO: implement properly
-    char buff[100];
-    recv(socked_fd_, buff, sizeof(buff), 0);
-    return buff;
+    // TODO: implement properly: error handling, buffer overflow
+    int size;
+    recv(socked_fd_, &size, sizeof(unsigned), 0);
+    string ret(size, 0);
+    recv(socked_fd_, &ret[0], size, 0);
+    return ret;
 }
 
 void Connection::SendMsg(const string &msg) {
-    // TODO: implement properly
+    // TODO: error handling
+    unsigned size = strlen(msg.data());
+    send(socked_fd_, &size, sizeof(unsigned), 0);
     send(socked_fd_, msg.data(), strlen(msg.data()), 0);
+}
+
+void Connection::SendProcessImage(const ProcessImage& pi) {
+    // TODO: implement properly: error handling
+    std::vector<char> data = pi.GetBytes();
+    send(socked_fd_, data.data(), data.size() * sizeof(char), 0);
+}
+
+ProcessImage Connection::RecvProcessImage(fs::path targetFileLocation) {
+    // TODO: error handling
+    // copied from stack overflow
+    std::ofstream file;
+    file.open(targetFileLocation.string(), std::ios::out | std::ios::binary);
+    assert(file.is_open());
+    char buffer[255];
+    while (1) {
+        ssize_t p = read(socked_fd_, buffer, sizeof(buffer));
+        assert(p != -1);
+        if (p == 0)
+            break;
+        file.write(buffer, p);
+    }
+    file.close();
+
+    return ProcessImage(targetFileLocation);
 }

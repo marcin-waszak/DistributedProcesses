@@ -18,7 +18,49 @@ using std::cout;
 using std::endl;
 using std::string;
 
-bool ServerListenTest(unsigned port) {
+// TODO: refactor: make class (or classes), not global variables,
+fs::path imagesPath;
+//  also serialize this vector
+std::vector<ProcessImage> processImages;
+
+void execCmd(Connection& connection) {
+    string msg = connection.RecvMsg();
+    std::cout<< "got command: " << msg << std::endl;
+    if (msg == "GET_WORKERS") {
+        // workers not implemented yet
+        string resp = "0";
+        std::cout<< "responding: " << resp << std::endl;
+        connection.SendMsg(resp);
+    } else if (msg == "GET_IMAGES_LIST") {
+        if (processImages.empty()) {
+            string resp = "<empty>";
+            connection.SendMsg(resp);
+            std::cout<< "responding:" << resp << std::endl;
+        } else {
+            std::ostringstream oss;
+            for (ProcessImage pi : processImages) {
+                oss << pi.GetPath() << endl;
+            }
+            std::cout<< "responding:\n" << oss.str() << std::endl;
+            connection.SendMsg(oss.str());
+        }
+    } else if (msg == "UPLOAD_IMAGE") {
+        string name = connection.RecvMsg();
+        fs::path filePath = imagesPath / name;
+        ProcessImage pi = connection.RecvProcessImage(filePath);
+        std::cout<< "image saved: " << filePath << std::endl;
+        bool found = false;
+        for (auto p : processImages) {
+            if (p.GetPath() == pi.GetPath()) {
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+            processImages.push_back(pi);
+    }
+}
+bool ServerLoop(unsigned port) {
     /*
     * This is temporary implementation of server for debugging
     * TODO: implement properly
@@ -57,7 +99,7 @@ bool ServerListenTest(unsigned port) {
     for (;;) {
         int connect_fd_ = accept(socket_fd_, NULL, NULL);
 
-        printf("new client \n");
+        cout << "----new client---" << endl;
 
         if (0 > connect_fd_) {
             perror("accept failed");
@@ -68,13 +110,8 @@ bool ServerListenTest(unsigned port) {
             continue;
         }
 
-        // Example behavior
         Connection connection(connect_fd_);
-        string msg = connection.RecvMsg();
-        std::cout<< "got command: " << msg << std::endl;
-        string exampleResponse = "123";
-        std::cout<< "responding: " << exampleResponse << std::endl;
-        connection.SendMsg(exampleResponse);
+        execCmd(connection);
     }
 
     if(close(socket_fd_) == -1)
@@ -87,6 +124,8 @@ int main(int argc, char* argv[]) {
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "print help message")
+        ("images-path,i", po::value<string>()->default_value("_server_images"),
+            "relative path to directory with process images")
         ("port,p", po::value<int>()->default_value(1100), "Port to listen at");
     po::positional_options_description pd;
     po::variables_map vm;
@@ -94,14 +133,22 @@ int main(int argc, char* argv[]) {
           options(desc).positional(pd).run(), vm);
     po::notify(vm);
 
+    imagesPath = vm["images-path"].as<string>();
+    if (!fs::exists(imagesPath)) {
+        cout << "Process images directory does not exist, creating empty directory: "
+             << imagesPath << endl;
+        fs::create_directory(imagesPath);
+    }
+
     if (vm.count("help")) {
         cout << desc << endl;
         return 0;
     }
     int port = vm["port"].as<int>();
 
-    if (ServerListenTest(port))  {
+    if (ServerLoop(port))  {
         cout << "Closing server" << endl;
+        // TODO: serialize state
         return 0;
     } else {
         cout << "Server run failed" << endl;

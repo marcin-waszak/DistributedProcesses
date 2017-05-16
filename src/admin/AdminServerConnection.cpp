@@ -11,3 +11,9 @@ vector<shared_ptr<Worker>> AdminServerConnection::GetWorkers() {
     string r = RecvMsg();
     return vector<shared_ptr<Worker>>(std::stoi(r), nullptr);
 }
+
+string AdminServerConnection::GetProcessImagesList() {
+    // TODO: error handling
+    SendMsg("GET_IMAGES_LIST");
+    return RecvMsg();
+}
