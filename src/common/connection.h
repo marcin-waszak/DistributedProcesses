@@ -11,8 +11,9 @@ class Connection {
     int SocketFD;
 
 public:
-    Connection(const string&);
+    Connection(int fd);
+    Connection(const string& addr,int port);
     ~Connection();
-    string receive();
+    string recvMsg();
     void sendMsg(const string&);
 };

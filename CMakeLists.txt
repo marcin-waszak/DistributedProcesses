@@ -12,6 +12,8 @@ add_executable (server "${PROJECT_SOURCE_DIR}/src/server/main.cpp")
 target_link_libraries(admin AdminServerConnection)
 target_link_libraries(admin Connection)
 target_link_libraries (admin boost_program_options)
+target_link_libraries (server Connection)
+target_link_libraries (server boost_program_options)
 
 # TODO: server, worker
 # TODO: move link_libraries somewhoere to subdirectory

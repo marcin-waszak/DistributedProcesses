@@ -14,7 +14,10 @@
 
 #include <iostream> // TODO remove line
 
-Connection::Connection(const string& addr) {
+Connection::Connection(int fd):SocketFD(fd) {
+}
+
+Connection::Connection(const string& addr, int port) {
     // TODO: implement properly
     SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (SocketFD == -1) {
@@ -25,7 +28,7 @@ Connection::Connection(const string& addr) {
     memset(&sa, 0, sizeof sa);
 
     sa.sin_family = AF_INET;
-    sa.sin_port = htons(1100);
+    sa.sin_port = htons(port);
     res = inet_pton(AF_INET, addr.data(), &sa.sin_addr);
 
     if (res != 1) {
@@ -45,11 +48,13 @@ Connection::Connection(const string& addr) {
 
 Connection::~Connection() {
     // TODO: implement properly
-    shutdown(SocketFD, SHUT_RDWR);
+    if (shutdown(SocketFD, SHUT_RDWR) == -1) {
+        perror("shutdown failed");
+    }
     close(SocketFD);
 }
 
-string Connection::receive() {
+string Connection::recvMsg() {
     // TODO: implement properly
     char buff[100];
     recv(SocketFD, buff, sizeof(buff), 0);

@@ -10,6 +10,6 @@ using std::shared_ptr;
 
 class AdminServerConnection : Connection{
 public:
-    AdminServerConnection(const string&);
+    AdminServerConnection(const string&, int port);
     vector<shared_ptr<Worker>> getWorkers();
 };
