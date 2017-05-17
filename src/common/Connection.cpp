@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,35 +15,77 @@
 
 #include <iostream> // TODO remove line
 
+static int Resolve(const string &address, addrinfo** info) {
+    int result = getaddrinfo(address.c_str(), NULL, NULL, info);
+    if (result) {
+        std::cout << "Invalid address" << std::endl
+            << gai_strerror(result) << std::endl;
+        return -1;
+    }
+    return 0;
+}
+
+std::pair<int, sockaddr_union> CreateSocket(const string& addr, int port) {
+    addrinfo* info = NULL;
+    if(Resolve(addr, &info) < 0) {
+        perror("Cannot resolve()");
+        exit(EXIT_FAILURE);
+    }
+
+    std::cout << "Resolve success" << std::endl;
+
+    int address_format = info->ai_family;
+    int packet_format = address_format == AF_INET6 ? PF_INET6 : PF_INET;
+    int socketFd = socket(packet_format, SOCK_STREAM, 0);
+    if (socketFd < 0) {
+        perror("socket()");
+        exit(EXIT_FAILURE);
+    }
+
+    sockaddr_union sa;
+    memset(&sa, 0, sizeof(sa));
+    sockaddr_in* addr_info;   // TODO: try to use sockaddr_union
+    sockaddr_in6* addr_info6; //
+
+    switch(address_format) {
+        case AF_INET:
+            std::cout << "Using AF_INET\n";
+            addr_info = (sockaddr_in*)info->ai_addr;
+            sa.sin.sin_family = AF_INET;
+            sa.sin.sin_port = htons(port);
+            sa.sin.sin_addr = addr_info->sin_addr;
+            break;
+
+        case AF_INET6:
+            std::cout << "Using AF_INET6\n";
+            addr_info6 = (sockaddr_in6*)info->ai_addr;
+            sa.sin6.sin6_family = AF_INET6;
+            sa.sin6.sin6_port = htons(port);
+            sa.sin6.sin6_addr = addr_info6->sin6_addr;
+            break;
+
+      default:
+            exit(EXIT_FAILURE);
+    }
+
+    //  freeaddrinfo(info);
+
+    return std::make_pair(socketFd, sa);
+}
+
 Connection::Connection(int fd):socked_fd_(fd) {
 }
 
 Connection::Connection(const string& addr, int port) {
-    // TODO: implement properly
-    socked_fd_ = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (socked_fd_ == -1) {
-        perror("cannot create socket");
-        exit(EXIT_FAILURE);
-    }
-
-    memset(&sa_, 0, sizeof sa_);
-
-    sa_.sin_family = AF_INET;
-    sa_.sin_port = htons(port);
-    int result = inet_pton(AF_INET, addr.data(), &sa_.sin_addr);
-
-    if (result != 1) {
-        std::cout << "wrong ip address" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
+    auto soc = CreateSocket(addr, port);
+    socked_fd_ = soc.first;
+    sockaddr_union sa = soc.second;
     std::cout << "Connecting to: " << addr << std::endl;
-    if (connect(socked_fd_, (struct sockaddr *)&sa_, sizeof sa_) == -1) {
+    if (connect(socked_fd_, (struct sockaddr *)&sa, sizeof sa) == -1) {
         perror("connect failed");
 
         if(close(socked_fd_) == -1)
             perror("close failed");
-
         exit(EXIT_FAILURE);
     }
 }

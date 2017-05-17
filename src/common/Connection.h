@@ -7,8 +7,14 @@
 
 using std::string;
 
+union sockaddr_union {
+  sockaddr_in6 sin6;
+  sockaddr_in sin;
+};
+
+std::pair<int, sockaddr_union> CreateSocket(const string& addr, int port);
+
 class Connection {
-    struct sockaddr_in sa_;
     int socked_fd_;
 
 public:

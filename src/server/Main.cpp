@@ -20,31 +20,14 @@ using std::cerr;
 using std::endl;
 using std::string;
 
-union sockaddr_union {
-  sockaddr_in6 sin6;
-  sockaddr_in sin;
-};
-
 // TODO: refactor: make class (or classes), not global variables,
-string address;
-int port;
+string addressStr;
+int port_;
 fs::path images_path;
 //  also serialize this vector
 std::vector<ProcessImage> processImages;
 
-int Resolve(const string &address, addrinfo** info) {
-  int result = getaddrinfo(address.c_str(), NULL, NULL, info);
-
-  if (result) {
-    cerr << "Invalid address" << endl
-         << gai_strerror(result) << endl;
-    return -1;
-  }
-
-  return 0;
-}
-
-void execCmd(Connection& connection) {
+void ExecCmd(Connection& connection) {
     string msg = connection.RecvMsg();
     std::cout<< "got command: " << msg << std::endl;
     if (msg == "GET_WORKERS") {
@@ -79,6 +62,8 @@ void execCmd(Connection& connection) {
         }
         if (!found)
             processImages.push_back(pi);
+    } else {
+        std::cout<< "unknown command, ignoring" << std::endl;
     }
 }
 
@@ -87,47 +72,9 @@ bool ServerLoop(const string& address, int port) {
     * This is temporary implementation of server for debugging
     * TODO: implement properly
     * */
-    addrinfo* info = NULL;
-    if(Resolve(address, &info) < 0) {
-      cerr << "Cannot resolve()" << endl;
-      return false;
-    }
-
-    cerr << "Resolve success\n";
-
-    int address_format = info->ai_family;
-    int packet_format = address_format == AF_INET6 ? PF_INET6 : PF_INET;
-    int socket_fd = socket(packet_format, SOCK_STREAM, 0);
-    if (socket_fd < 0) {
-      perror("socket()");
-      return false;
-    }
-
-    sockaddr_union sa;
-    memset(&sa, 0, sizeof(sa));
-    sockaddr_in* addr_info;   // TODO: try to use sockaddr_union
-    sockaddr_in6* addr_info6; //
-
-    switch(address_format) {
-      case AF_INET:
-        addr_info = (sockaddr_in*)info->ai_addr;
-        sa.sin.sin_family = AF_INET;
-        sa.sin.sin_port = htons(port);
-        sa.sin.sin_addr = addr_info->sin_addr;
-        break;
-
-      case AF_INET6:
-        addr_info6 = (sockaddr_in6*)info->ai_addr;
-        sa.sin6.sin6_family = AF_INET6;
-        sa.sin6.sin6_port = htons(port);
-        sa.sin6.sin6_addr = addr_info6->sin6_addr;
-        break;
-
-      default:
-        return false;
-    }
-
-//  freeaddrinfo(info);
+    auto soc = CreateSocket(address, port);
+    int socket_fd = soc.first;
+    sockaddr_union sa = soc.second;
 
     if (bind(socket_fd, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
         perror("bind failed");
@@ -165,7 +112,7 @@ bool ServerLoop(const string& address, int port) {
         cerr << "Accept success\n";
         cout << "----new client---" << endl;
         Connection connection(connect_fd);
-        execCmd(connection);
+        ExecCmd(connection);
     }
 
     if(close(socket_fd) < 0)
@@ -201,8 +148,8 @@ void GetArguments(int argc, char** argv) {
             cout << desc << endl;
             exit(0);
         }
-        address = vm["address"].as<string>();
-        port = vm["port"].as<int>();
+        addressStr = vm["address"].as<string>();
+        port_ = vm["port"].as<int>();
     }
     catch(po::error& e) {
         cerr << "ERROR: " << e.what() << endl << endl;
@@ -214,7 +161,7 @@ void GetArguments(int argc, char** argv) {
 int main(int argc, char* argv[]) {
     GetArguments(argc, argv);
 
-    if (ServerLoop(address, port))  {
+    if (ServerLoop(addressStr, port_))  {
         cout << "Closing server" << endl;
         // TODO: serialize state
         return 0;
