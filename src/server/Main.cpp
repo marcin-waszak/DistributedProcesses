@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,13 +16,33 @@
 
 namespace po = boost::program_options;
 using std::cout;
+using std::cerr;
 using std::endl;
 using std::string;
 
+union sockaddr_union {
+  sockaddr_in6 sin6;
+  sockaddr_in sin;
+};
+
 // TODO: refactor: make class (or classes), not global variables,
-fs::path imagesPath;
+string address;
+int port;
+fs::path images_path;
 //  also serialize this vector
 std::vector<ProcessImage> processImages;
+
+int Resolve(const string &address, addrinfo** info) {
+  int result = getaddrinfo(address.c_str(), NULL, NULL, info);
+
+  if (result) {
+    cerr << "Invalid address" << endl
+         << gai_strerror(result) << endl;
+    return -1;
+  }
+
+  return 0;
+}
 
 void execCmd(Connection& connection) {
     string msg = connection.RecvMsg();
@@ -46,7 +67,7 @@ void execCmd(Connection& connection) {
         }
     } else if (msg == "UPLOAD_IMAGE") {
         string name = connection.RecvMsg();
-        fs::path filePath = imagesPath / name;
+        fs::path filePath = images_path / name;
         ProcessImage pi = connection.RecvProcessImage(filePath);
         std::cout<< "image saved: " << filePath << std::endl;
         bool found = false;
@@ -60,93 +81,140 @@ void execCmd(Connection& connection) {
             processImages.push_back(pi);
     }
 }
-bool ServerLoop(unsigned port) {
+
+bool ServerLoop(const string& address, int port) {
     /*
     * This is temporary implementation of server for debugging
     * TODO: implement properly
     * */
-    struct sockaddr_in sa;
-    int socket_fd_ = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (socket_fd_ == -1) {
-        perror("cannot create socket");
+    addrinfo* info = NULL;
+    if(Resolve(address, &info) < 0) {
+      cerr << "Cannot resolve()" << endl;
+      return false;
+    }
+
+    cerr << "Resolve success\n";
+
+    int address_format = info->ai_family;
+    int packet_format = address_format == AF_INET6 ? PF_INET6 : PF_INET;
+    int socket_fd = socket(packet_format, SOCK_STREAM, 0);
+    if (socket_fd < 0) {
+      perror("socket()");
+      return false;
+    }
+
+    sockaddr_union sa;
+    memset(&sa, 0, sizeof(sa));
+    sockaddr_in* addr_info;   // TODO: try to use sockaddr_union
+    sockaddr_in6* addr_info6; //
+
+    switch(address_format) {
+      case AF_INET:
+        addr_info = (sockaddr_in*)info->ai_addr;
+        sa.sin.sin_family = AF_INET;
+        sa.sin.sin_port = htons(port);
+        sa.sin.sin_addr = addr_info->sin_addr;
+        break;
+
+      case AF_INET6:
+        addr_info6 = (sockaddr_in6*)info->ai_addr;
+        sa.sin6.sin6_family = AF_INET6;
+        sa.sin6.sin6_port = htons(port);
+        sa.sin6.sin6_addr = addr_info6->sin6_addr;
+        break;
+
+      default:
         return false;
     }
 
-    memset(&sa, 0, sizeof sa);
+//  freeaddrinfo(info);
 
-    sa.sin_family = AF_INET;
-    sa.sin_port = htons(port);
-    sa.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    if (bind(socket_fd_,(struct sockaddr *)&sa, sizeof sa) == -1) {
+    if (bind(socket_fd, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
         perror("bind failed");
 
-        if(close(socket_fd_) == -1)
+        if(close(socket_fd) < 0)
             perror("close failed");
 
         return false;
     }
 
-    if (listen(socket_fd_, 10) == -1) {
+    cerr << "Bind success\n";
+
+    if (listen(socket_fd, 10) < 0) {
         perror("listen failed");
 
-        if(close(socket_fd_) == -1)
+        if(close(socket_fd) < 0)
             perror("close failed");
 
         return false;
     }
 
+    cerr << "Listen success\n";
+
     for (;;) {
-        int connect_fd_ = accept(socket_fd_, NULL, NULL);
+        int connect_fd = accept(socket_fd, NULL, NULL);
 
-        cout << "----new client---" << endl;
-
-        if (0 > connect_fd_) {
+        if (0 > connect_fd) {
             perror("accept failed");
 
-            if(close(socket_fd_) == -1)
+            if(close(socket_fd) < 0)
                 perror("close failed");
 
             continue;
         }
-
-        Connection connection(connect_fd_);
+        cerr << "Accept success\n";
+        cout << "----new client---" << endl;
+        Connection connection(connect_fd);
         execCmd(connection);
     }
 
-    if(close(socket_fd_) == -1)
+    if(close(socket_fd) < 0)
         perror("close failed");
 
     return true;
 }
 
-int main(int argc, char* argv[]) {
+void GetArguments(int argc, char** argv) {
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "print help message")
         ("images-path,i", po::value<string>()->default_value("_server_images"),
-            "relative path to directory with process images")
+         "relative path to directory with process images")
+        ("address,ap", po::value<string>()->default_value("localhost"), "Server address")
         ("port,p", po::value<int>()->default_value(1100), "Port to listen at");
     po::positional_options_description pd;
     po::variables_map vm;
-    po::store(po::command_line_parser(argc, argv).
-          options(desc).positional(pd).run(), vm);
-    po::notify(vm);
 
-    imagesPath = vm["images-path"].as<string>();
-    if (!fs::exists(imagesPath)) {
-        cout << "Process images directory does not exist, creating empty directory: "
-             << imagesPath << endl;
-        fs::create_directory(imagesPath);
+    try {
+        po::store(po::command_line_parser(argc, argv).
+            options(desc).positional(pd).run(), vm);
+        po::notify(vm);
+
+        images_path = vm["images-path"].as<string>();
+        if (!fs::exists(images_path)) {
+            cout << "Process images directory does not exist, creating empty directory: "
+                 << images_path << endl;
+            fs::create_directory(images_path);
+        }
+
+        if (vm.count("help")) {
+            cout << desc << endl;
+            exit(0);
+        }
+        address = vm["address"].as<string>();
+        port = vm["port"].as<int>();
     }
-
-    if (vm.count("help")) {
-        cout << desc << endl;
-        return 0;
+    catch(po::error& e) {
+        cerr << "ERROR: " << e.what() << endl << endl;
+        cerr << desc << endl;
+        exit(1);
     }
-    int port = vm["port"].as<int>();
+}
 
-    if (ServerLoop(port))  {
+int main(int argc, char* argv[]) {
+    GetArguments(argc, argv);
+
+    if (ServerLoop(address, port))  {
         cout << "Closing server" << endl;
         // TODO: serialize state
         return 0;
@@ -154,5 +222,4 @@ int main(int argc, char* argv[]) {
         cout << "Server run failed" << endl;
         return 1;
     }
-
 }
