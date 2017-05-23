@@ -8,8 +8,9 @@
 using std::vector;
 using std::shared_ptr;
 
-class AdminServerConnection : Connection{
+class AdminServerConnection : public Connection{
 public:
     AdminServerConnection(const string&, int port);
     vector<shared_ptr<Worker>> GetWorkers();
+    string GetProcessImagesList();
 };
