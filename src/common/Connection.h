@@ -20,6 +20,7 @@ class Connection {
 public:
     Connection(int fd);
     Connection(const string& addr,int port);
+    static std::pair<int, sockaddr_union> CreateSocket(const string& addr, int port);
     ~Connection();
     string RecvMsg();
     void SendMsg(const string &msg);
