@@ -26,7 +26,7 @@ static int Resolve(const string &address, addrinfo** info) {
     return 0;
 }
 
-std::pair<int, sockaddr_union> CreateSocket(const string& addr, int port) {
+std::pair<int, sockaddr_union> Connection::CreateSocket(const string& addr, int port) {
     addrinfo* info = NULL;
     if(Resolve(addr, &info) < 0) {
         perror("Cannot resolve()");

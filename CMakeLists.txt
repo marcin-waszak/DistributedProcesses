@@ -12,7 +12,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wshadow")
 
 # Executables
 add_executable (admin "${PROJECT_SOURCE_DIR}/src/admin/Main.cpp")
-add_executable (server "${PROJECT_SOURCE_DIR}/src/server/Main.cpp")
+add_executable (server "${PROJECT_SOURCE_DIR}/src/server/Main.cpp" src/server/Server.cpp src/server/Server.h)
 target_link_libraries (admin AdminServerConnection)
 target_link_libraries (admin Connection)
 target_link_libraries (admin ProcessImage)

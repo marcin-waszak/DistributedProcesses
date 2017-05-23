@@ -120,6 +120,4 @@ CTestTestfile.cmake
 *.gz
 
 .idea/
-admin
-server
-worker
+bin/
