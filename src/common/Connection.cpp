@@ -14,6 +14,7 @@
 #include <sys/socket.h>
 
 #include <iostream> // TODO remove line
+#include <fstream>
 
 static int Resolve(const string &address, addrinfo** info) {
     int result = getaddrinfo(address.c_str(), NULL, NULL, info);
