@@ -13,13 +13,13 @@ void Server::ExecCmd(Connection& connection) {
     std::cout<< "responding: " << resp << std::endl;
     connection.SendMsg(resp);
   } else if (msg == "GET_IMAGES_LIST") {
-    if (processImages.empty()) {
+    if (process_images_.empty()) {
       string resp = "<empty>";
       connection.SendMsg(resp);
       std::cout<< "responding:" << resp << std::endl;
     } else {
       std::ostringstream oss;
-      for (ProcessImage pi : processImages) {
+      for (ProcessImage pi : process_images_) {
         oss << pi.GetPath() << endl;
       }
       std::cout<< "responding:\n" << oss.str() << std::endl;
@@ -27,18 +27,18 @@ void Server::ExecCmd(Connection& connection) {
     }
   } else if (msg == "UPLOAD_IMAGE") {
     string name = connection.RecvMsg();
-    fs::path filePath = images_path / name;
+    fs::path filePath = images_path_ / name;
     ProcessImage pi = connection.RecvProcessImage(filePath);
     std::cout<< "image saved: " << filePath << std::endl;
     bool found = false;
-    for (auto p : processImages) {
+    for (auto p : process_images_) {
       if (p.GetPath() == pi.GetPath()) {
         found = true;
         break;
       }
     }
     if (!found)
-      processImages.push_back(pi);
+      process_images_.push_back(pi);
   } else {
     std::cout<< "unknown command, ignoring" << std::endl;
   }
@@ -49,7 +49,7 @@ bool Server::ServerLoop() {
   * This is temporary implementation of server for debugging
   * TODO: implement properly
   * */
-  auto soc = Connection::CreateSocket(addressStr, port_);
+  auto soc = Connection::CreateSocket(address_str_, port_);
   int socket_fd = soc.first;
   sockaddr_union sa = soc.second;
 
@@ -114,18 +114,18 @@ void Server::GetArguments(int argc, char** argv) {
         options(desc).positional(pd).run(), vm);
     po::notify(vm);
 
-    images_path = vm["images-path"].as<string>();
-    if (!fs::exists(images_path)) {
+    images_path_ = vm["images-path"].as<string>();
+    if (!fs::exists(images_path_)) {
       cout << "Process images directory does not exist, creating empty directory: "
-           << images_path << endl;
-      fs::create_directory(images_path);
+           << images_path_ << endl;
+      fs::create_directory(images_path_);
     }
 
     if (vm.count("help")) {
       cout << desc << endl;
       exit(0);
     }
-    addressStr = vm["address"].as<string>();
+    address_str_ = vm["address"].as<string>();
     port_ = vm["port"].as<int>();
   }
   catch(po::error& e) {

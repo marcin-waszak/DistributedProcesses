@@ -33,10 +33,10 @@ public:
 private:
   void ExecCmd(Connection& connection);
 
-  string addressStr;
+  string address_str_;
   int port_;
-  fs::path images_path;
+  fs::path images_path_;
 //  also serialize this vector
-  std::vector<ProcessImage> processImages;
+  std::vector<ProcessImage> process_images_;
 };
 
