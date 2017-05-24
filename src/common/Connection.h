@@ -12,8 +12,6 @@ union sockaddr_union {
   sockaddr_in sin;
 };
 
-std::pair<int, sockaddr_union> CreateSocket(const string& addr, int port);
-
 class Connection {
     int socked_fd_;
 

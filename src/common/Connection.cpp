@@ -37,11 +37,15 @@ std::pair<int, sockaddr_union> Connection::CreateSocket(const string& addr, int 
 
     int address_format = info->ai_family;
     int packet_format = address_format == AF_INET6 ? PF_INET6 : PF_INET;
-    int socketFd = socket(packet_format, SOCK_STREAM, 0);
-    if (socketFd < 0) {
+    int socket_fd = socket(packet_format, SOCK_STREAM, 0);
+    if (socket_fd < 0) {
         perror("socket()");
         return std::make_pair(-1, sockaddr_union());
     }
+
+    int enable = 1;
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+        perror("setsockopt(SO_REUSEADDR) failed");
 
     sockaddr_union sa;
     memset(&sa, 0, sizeof(sa));
@@ -71,7 +75,7 @@ std::pair<int, sockaddr_union> Connection::CreateSocket(const string& addr, int 
 
     //  freeaddrinfo(info);
 
-    return std::make_pair(socketFd, sa);
+    return std::make_pair(socket_fd, sa);
 }
 
 Connection::Connection(int fd):socked_fd_(fd), valid_(true) {

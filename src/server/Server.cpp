@@ -4,34 +4,60 @@
 
 #include "Server.h"
 
-void Server::ExecCmd(Connection& connection) {
+void Server::ThreadFunc(int connect_fd) {
+  Connection connection(connect_fd);
+
+  for (;;) {
+    if (!ExecCmd(connection))
+      break;
+
+    break; // TODO: delete, when Recv() fixed
+  }
+
+  // TODO: synchronization
+  threads_closed_.push_back(connect_fd);
+}
+
+bool Server::CleanThreads() { // TODO: sometimes crashes due to nonexistent map key
+  while(!threads_closed_.empty()) {
+    auto socket_fd = threads_closed_.back();
+    if(threads_.at(socket_fd)->joinable())
+      threads_.at(socket_fd)->join();
+    threads_.erase(socket_fd); // TODO: if not exist return false
+    threads_closed_.pop_back();
+  }
+
+  return true;
+}
+
+bool Server::ExecCmd(Connection& connection) {
   string msg = connection.RecvMsg();
-  std::cout<< "got command: " << msg << std::endl;
+  cout << "got command: " << msg << endl;
   if (msg == "GET_WORKERS") {
     // workers not implemented yet
     string resp = "0";
-    std::cout<< "responding: " << resp << std::endl;
+    cout << "responding: " << resp << endl;
     connection.SendMsg(resp);
   } else if (msg == "GET_IMAGES_LIST") {
     if (process_images_.empty()) {
       string resp = "<empty>";
       connection.SendMsg(resp);
-      std::cout<< "responding:" << resp << std::endl;
+      cout << "responding:" << resp << endl;
     } else {
-      std::ostringstream oss;
-      for (ProcessImage pi : process_images_) {
+      ostringstream oss;
+      for (ProcessImage& pi : process_images_) {
         oss << pi.GetPath() << endl;
       }
-      std::cout<< "responding:\n" << oss.str() << std::endl;
+      cout << "responding:\n" << oss.str() << endl;
       connection.SendMsg(oss.str());
     }
   } else if (msg == "UPLOAD_IMAGE") {
     string name = connection.RecvMsg();
     fs::path filePath = images_path_ / name;
     ProcessImage pi = connection.RecvProcessImage(filePath);
-    std::cout<< "image saved: " << filePath << std::endl;
+    cout << "image saved: " << filePath << endl;
     bool found = false;
-    for (auto p : process_images_) {
+    for (auto& p : process_images_) {
       if (p.GetPath() == pi.GetPath()) {
         found = true;
         break;
@@ -40,8 +66,11 @@ void Server::ExecCmd(Connection& connection) {
     if (!found)
       process_images_.push_back(pi);
   } else {
-    std::cout<< "unknown command, ignoring" << std::endl;
+    cout << "unknown command, ignoring" << endl;
   }
+
+  // false on connection close
+  return true;
 }
 
 bool Server::ServerLoop() {
@@ -52,6 +81,14 @@ bool Server::ServerLoop() {
   auto soc = Connection::CreateSocket(address_str_, port_);
   int socket_fd = soc.first;
   sockaddr_union sa = soc.second;
+
+  int optval;
+  int optlen;
+  // see if the SO_REUSEADDR flag is set:
+  getsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &optval, (socklen_t*)&optlen);
+  if (optval != 0) {
+    cerr << "SO_REUSEADDR enabled!\n";
+  }
 
   if (bind(socket_fd, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
     perror("bind failed");
@@ -76,25 +113,33 @@ bool Server::ServerLoop() {
   cerr << "Listen success\n";
 
   for (;;) {
+    CleanThreads();
+
     int connect_fd = accept(socket_fd, NULL, NULL);
 
     if (0 > connect_fd) {
       perror("accept failed");
 
-      if(close(socket_fd) < 0)
+      if(close(socket_fd) < 0) {
         perror("close failed");
+        break;
+      }
 
       continue;
     }
+
     cerr << "Accept success\n";
     cout << "----new client---" << endl;
-    Connection connection(connect_fd);
-    ExecCmd(connection);
+
+    threads_.insert(make_pair(connect_fd, make_unique<thread>(
+        thread(&Server::ThreadFunc, this, connect_fd))));
+
   }
 
   if(close(socket_fd) < 0)
     perror("close failed");
 
+  cerr << "Closing server!\n";
   return true;
 }
 
