@@ -17,9 +17,17 @@ std::pair<int, sockaddr_union> CreateSocket(const string& addr, int port);
 class Connection {
     int socked_fd_;
 
+    // for reconnection
+    string addr_;
+    int port_;
+
+    bool valid_;
+
 public:
     Connection(int fd);
     Connection(const string& addr,int port);
+    bool Connect();
+    bool Valid()const;
     static std::pair<int, sockaddr_union> CreateSocket(const string& addr, int port);
     ~Connection();
     string RecvMsg();

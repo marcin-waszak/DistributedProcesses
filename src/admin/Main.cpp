@@ -45,18 +45,30 @@ int main(int argc, char* argv[]) {
 
     if (vm.count("list-workers")) {
         AdminServerConnection connection = CreateServerConnection(vm);
+        if (!connection.Valid()) {
+            std::cerr << "Cannot connect to server." << endl;
+            return 1;
+        }
         cout << "Workers count " << connection.GetWorkers().size() << endl;
         return 0;
     }
 
     if (vm.count("list-images")) {
         AdminServerConnection connection = CreateServerConnection(vm);
+        if (!connection.Valid()) {
+            std::cerr << "Cannot connect to server." << endl;
+            return 1;
+        }
         cout << "Images on server:\n"<< connection.GetProcessImagesList() << endl;
         return 0;
     }
 
     if (vm.count("upload-image")) {
         AdminServerConnection connection = CreateServerConnection(vm);
+        if (!connection.Valid()) {
+            std::cerr << "Cannot connect to server." << endl;
+            return 1;
+        }
         connection.SendMsg("UPLOAD_IMAGE");
         string imageName = vm["upload-image"].as<string>();
         connection.SendMsg(imageName);

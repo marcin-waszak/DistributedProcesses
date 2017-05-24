@@ -9,5 +9,6 @@ class Worker {
 
 public:
     Worker(const string& addr,int port, fs::path images_path);
+    void ExecCmd(const string&);
     bool WorkerLoop();
 };

@@ -30,7 +30,7 @@ std::pair<int, sockaddr_union> Connection::CreateSocket(const string& addr, int 
     addrinfo* info = NULL;
     if(Resolve(addr, &info) < 0) {
         perror("Cannot resolve()");
-        exit(EXIT_FAILURE);
+        return std::make_pair(-1, sockaddr_union());
     }
 
     std::cout << "Resolve success" << std::endl;
@@ -40,7 +40,7 @@ std::pair<int, sockaddr_union> Connection::CreateSocket(const string& addr, int 
     int socketFd = socket(packet_format, SOCK_STREAM, 0);
     if (socketFd < 0) {
         perror("socket()");
-        exit(EXIT_FAILURE);
+        return std::make_pair(-1, sockaddr_union());
     }
 
     sockaddr_union sa;
@@ -66,7 +66,7 @@ std::pair<int, sockaddr_union> Connection::CreateSocket(const string& addr, int 
             break;
 
       default:
-            exit(EXIT_FAILURE);
+            return std::make_pair(-1, sockaddr_union());
     }
 
     //  freeaddrinfo(info);
@@ -74,21 +74,37 @@ std::pair<int, sockaddr_union> Connection::CreateSocket(const string& addr, int 
     return std::make_pair(socketFd, sa);
 }
 
-Connection::Connection(int fd):socked_fd_(fd) {
+Connection::Connection(int fd):socked_fd_(fd), valid_(true) {
 }
 
-Connection::Connection(const string& addr, int port) {
-    auto soc = CreateSocket(addr, port);
+bool Connection::Connect() {
+    auto soc = CreateSocket(addr_, port_);
     socked_fd_ = soc.first;
+    if (socked_fd_ == -1) {
+        valid_ = false;
+        return false;
+    }
     sockaddr_union sa = soc.second;
-    std::cout << "Connecting to: " << addr << std::endl;
+    std::cout << "Connecting to: " << addr_ << std::endl;
     if (connect(socked_fd_, (struct sockaddr *)&sa, sizeof sa) == -1) {
         perror("connect failed");
 
         if(close(socked_fd_) == -1)
             perror("close failed");
-        exit(EXIT_FAILURE);
+        valid_ = false;
+        return false;
     }
+    valid_ = true;
+    return true;
+}
+
+bool Connection::Valid()const {
+    return valid_;
+}
+
+Connection::Connection(const string& addr, int port)
+        :addr_(addr), port_(port), valid_(false) {
+    Connect();
 }
 
 Connection::~Connection() {
@@ -102,6 +118,7 @@ Connection::~Connection() {
 }
 
 string Connection::RecvMsg() {
+    if (!valid_) throw std::logic_error("Trying to use invalid connection.");
     // TODO: implement properly: error handling, buffer overflow
     int size;
     recv(socked_fd_, &size, sizeof(unsigned), 0);
@@ -111,6 +128,7 @@ string Connection::RecvMsg() {
 }
 
 void Connection::SendMsg(const string &msg) {
+    if (!valid_) throw std::logic_error("Trying to use invalid connection.");
     // TODO: error handling
     unsigned size = strlen(msg.data());
     send(socked_fd_, &size, sizeof(unsigned), 0);
@@ -118,12 +136,14 @@ void Connection::SendMsg(const string &msg) {
 }
 
 void Connection::SendProcessImage(const ProcessImage& pi) {
+    if (!valid_) throw std::logic_error("Trying to use invalid connection.");
     // TODO: implement properly: error handling
     std::vector<char> data = pi.GetBytes();
     send(socked_fd_, data.data(), data.size() * sizeof(char), 0);
 }
 
 ProcessImage Connection::RecvProcessImage(fs::path targetFileLocation) {
+    if (!valid_) throw std::logic_error("Trying to use invalid connection.");
     // TODO: error handling
     // copied from stack overflow
     std::ofstream file;
