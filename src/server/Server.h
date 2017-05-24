@@ -17,6 +17,9 @@
 #include <unistd.h>
 #include <iostream>
 #include <boost/program_options.hpp>
+#include <thread>
+#include <memory>
+#include <pthread.h>
 
 namespace po = boost::program_options;
 
@@ -31,6 +34,7 @@ public:
   bool ServerLoop();
 
 private:
+  void ThreadFunc(int num);
   void ExecCmd(Connection& connection);
 
   string address_str_;

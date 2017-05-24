@@ -4,6 +4,16 @@
 
 #include "Server.h"
 
+void Server::ThreadFunc(int num) {
+  cerr << "Hallo from thread!" << endl;
+  cerr << num << endl;
+
+  for(;;) {
+    cerr << "I am alive!\n";
+    usleep(1000);
+  }
+}
+
 void Server::ExecCmd(Connection& connection) {
   string msg = connection.RecvMsg();
   std::cout<< "got command: " << msg << std::endl;
@@ -53,6 +63,14 @@ bool Server::ServerLoop() {
   int socket_fd = soc.first;
   sockaddr_union sa = soc.second;
 
+  int optval;
+  int optlen;
+  // see if the SO_REUSEADDR flag is set:
+  getsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &optval, (socklen_t*)&optlen);
+  if (optval != 0) {
+    std::cerr << "SO_REUSEADDR enabled!\n";
+  }
+
   if (bind(socket_fd, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
     perror("bind failed");
 
@@ -76,25 +94,34 @@ bool Server::ServerLoop() {
   cerr << "Listen success\n";
 
   for (;;) {
+    cerr << "READY\n";
     int connect_fd = accept(socket_fd, NULL, NULL);
 
     if (0 > connect_fd) {
       perror("accept failed");
 
-      if(close(socket_fd) < 0)
+      if(close(socket_fd) < 0) {
         perror("close failed");
+        break;
+      }
 
       continue;
     }
+
     cerr << "Accept success\n";
     cout << "----new client---" << endl;
     Connection connection(connect_fd);
     ExecCmd(connection);
+
+    std::thread t(&Server::ThreadFunc, this, 666);
+    //t.join();
+    cerr << "Thread spawned!\n";
   }
 
   if(close(socket_fd) < 0)
     perror("close failed");
 
+  cerr << "Closing server!\n";
   return true;
 }
 
