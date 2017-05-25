@@ -4,7 +4,11 @@
 
 #include "Server.h"
 
-void Server::ThreadFunc(int connect_fd) {
+Server::Server() : session_id_(0) {
+
+}
+
+void Server::ThreadFunc(int connect_fd, unsigned session_id) {
   Connection connection(connect_fd);
 
   for (;;) {
@@ -15,18 +19,23 @@ void Server::ThreadFunc(int connect_fd) {
   }
 
   // TODO: synchronization
-  threads_closed_.push_back(connect_fd);
+  sessions_to_close_mutex_.lock();
+  sessions_to_close_.push_back(session_id);
+  sessions_to_close_mutex_.unlock();
 }
 
 bool Server::CleanThreads() { // TODO: sometimes crashes due to nonexistent map key
-  while(!threads_closed_.empty()) {
-    auto socket_fd = threads_closed_.back();
-    if(threads_.at(socket_fd)->joinable())
-      threads_.at(socket_fd)->join();
-    threads_.erase(socket_fd); // TODO: if not exist return false
-    threads_closed_.pop_back();
+  sessions_to_close_mutex_.lock();
+
+  while(!sessions_to_close_.empty()) {
+    auto session_id = sessions_to_close_.back();
+    if(sessions_.at(session_id)->joinable())
+      sessions_.at(session_id)->join();
+    sessions_.erase(session_id); // TODO: if not exist return false
+    sessions_to_close_.pop_back();
   }
 
+  sessions_to_close_mutex_.unlock();
   return true;
 }
 
@@ -131,8 +140,12 @@ bool Server::ServerLoop() {
     cerr << "Accept success\n";
     cout << "----new client---" << endl;
 
-    threads_.insert(make_pair(connect_fd, make_unique<thread>(
-        thread(&Server::ThreadFunc, this, connect_fd))));
+    sessions_to_close_mutex_.lock();
+    ++session_id_;
+    sessions_to_close_mutex_.unlock();
+
+    sessions_.insert(make_pair(session_id_, make_unique<thread>(
+        thread(&Server::ThreadFunc, this, connect_fd, session_id_))));
 
   }
 
