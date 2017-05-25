@@ -19,7 +19,7 @@
 #include <boost/program_options.hpp>
 #include <thread>
 #include <memory>
-#include <pthread.h>
+#include <mutex>
 
 namespace po = boost::program_options;
 
@@ -34,15 +34,17 @@ using std::thread;
 using std::ostringstream;
 using std::map;
 using std::vector;
+using std::mutex;
 
 class Server {
 public:
+  Server();
   void GetArguments(int argc, char** argv);
   bool ServerLoop();
   bool CleanThreads();
 
 private:
-  void ThreadFunc(int connect_fd);
+  void ThreadFunc(int connect_fd, unsigned session_id);
   bool ExecCmd(Connection& connection);
 
   string address_str_;
@@ -51,7 +53,9 @@ private:
 //  also serialize this vector
   vector<ProcessImage> process_images_;
 
-  map<int, unique_ptr<thread>> threads_;
-  vector<int> threads_closed_;
+  unsigned session_id_;
+  std::mutex sessions_to_close_mutex_;
+  map<int, unique_ptr<thread>> sessions_;
+  vector<int> sessions_to_close_;
 };
 
