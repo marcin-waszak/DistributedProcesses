@@ -56,7 +56,7 @@ bool Worker::WorkerLoop() {
         try {
             string cmd = server_connection_.RecvMsg();
             ExecCmd(cmd);
-        } catch (std::logic_error) {
+        } catch (ConnectionException) {
             std::cout<< "Trying to establish server connection." << std::endl;
             if (server_connection_.Connect()) {
                 std::cout<< "Connection established." << std::endl;

@@ -8,10 +8,13 @@ void Server::ThreadFunc(int connect_fd) {
   Connection connection(connect_fd);
 
   for (;;) {
-    if (!ExecCmd(connection))
+    try {
+      if (!ExecCmd(connection))
+        break;
+    } catch (ConnectionException) {
+      cerr << "Admin disconnected" << endl;
       break;
-
-    break; // TODO: delete, when Recv() fixed
+    }
   }
 
   // TODO: synchronization

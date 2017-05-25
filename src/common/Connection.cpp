@@ -19,7 +19,7 @@
 static int Resolve(const string &address, addrinfo** info) {
     int result = getaddrinfo(address.c_str(), NULL, NULL, info);
     if (result) {
-        std::cout << "Invalid address" << std::endl
+        std::cerr << "Invalid address" << std::endl
             << gai_strerror(result) << std::endl;
         return -1;
     }
@@ -78,6 +78,31 @@ std::pair<int, sockaddr_union> Connection::CreateSocket(const string& addr, int 
     return std::make_pair(socket_fd, sa);
 }
 
+void Connection::Send(void* data, size_t size) {
+    int code = send(socked_fd_, data, size, 0);
+    if (code == -1) {
+        valid_ = false;
+        throw ConnectionException("Lost connection.");
+    }
+    if (code == 0) {
+        valid_ = false;
+        throw ConnectionException(
+                "peer has performed an orderly shutdown");
+    }
+}
+void Connection::Recv(void* data, size_t size) {
+    int code = recv(socked_fd_, data, size, 0);
+    if (code == -1) {
+        valid_ = false;
+        throw ConnectionException("Lost connection.");
+    }
+    if (code == 0) {
+        valid_ = false;
+        throw ConnectionException(
+                "peer has performed an orderly shutdown");
+    }
+}
+
 Connection::Connection(int fd):socked_fd_(fd), valid_(true) {
 }
 
@@ -112,56 +137,59 @@ Connection::Connection(const string& addr, int port)
 }
 
 Connection::~Connection() {
-    // TODO: implement properly
-    if (shutdown(socked_fd_, SHUT_RDWR) == -1) {
+    if (shutdown(socked_fd_, SHUT_RDWR) == -1)
         perror("shutdown failed");
-    }
-
     if(close(socked_fd_) == -1)
         perror("close failed");
 }
 
 string Connection::RecvMsg() {
-    if (!valid_) throw std::logic_error("Trying to use invalid connection.");
-    // TODO: implement properly: error handling, buffer overflow
+    if (!valid_) throw ConnectionException("Trying to use invalid connection.");
     int size;
-    recv(socked_fd_, &size, sizeof(unsigned), 0);
+    Recv(&size, sizeof(unsigned));
     string ret(size, 0);
-    recv(socked_fd_, &ret[0], size, 0);
+    Recv(&ret[0], size);
     return ret;
 }
 
 void Connection::SendMsg(const string &msg) {
-    if (!valid_) throw std::logic_error("Trying to use invalid connection.");
-    // TODO: error handling
+    if (!valid_) throw ConnectionException("Trying to use invalid connection.");
     unsigned size = strlen(msg.data());
-    send(socked_fd_, &size, sizeof(unsigned), 0);
-    send(socked_fd_, msg.data(), strlen(msg.data()), 0);
+    Send(&size, sizeof(unsigned));
+    Send((void*)msg.data(), strlen(msg.data()));
 }
 
 void Connection::SendProcessImage(const ProcessImage& pi) {
-    if (!valid_) throw std::logic_error("Trying to use invalid connection.");
-    // TODO: implement properly: error handling
+    if (!valid_) throw ConnectionException("Trying to use invalid connection.");
     std::vector<char> data = pi.GetBytes();
-    send(socked_fd_, data.data(), data.size() * sizeof(char), 0);
+    unsigned size = data.size();
+    Send(&size, sizeof(unsigned));
+    Send(data.data(), data.size() * sizeof(char));
 }
 
-ProcessImage Connection::RecvProcessImage(fs::path targetFileLocation) {
-    if (!valid_) throw std::logic_error("Trying to use invalid connection.");
-    // TODO: error handling
-    // copied from stack overflow
+ProcessImage Connection::RecvProcessImage(fs::path target) {
+    if (!valid_) throw ConnectionException("Trying to use invalid connection.");
     std::ofstream file;
-    file.open(targetFileLocation.string(), std::ios::out | std::ios::binary);
+    file.open(target.string(), std::ios::out | std::ios::binary);
+    // TODO: handle following error
     assert(file.is_open());
     char buffer[255];
-    while (1) {
+    unsigned size, total = 0;
+    Recv(&size, sizeof(unsigned));
+    while (total < size) {
         ssize_t p = read(socked_fd_, buffer, sizeof(buffer));
+        if (p < 0) {
+            valid_ = false;
+            throw ConnectionException("Lost connection.");
+        }
+        total += p;
         assert(p != -1);
         if (p == 0)
             break;
         file.write(buffer, p);
     }
+    assert(total == size);
     file.close();
 
-    return ProcessImage(targetFileLocation);
+    return ProcessImage(target);
 }

@@ -3,6 +3,7 @@
 #include "ProcessImage.h"
 
 #include <string>
+#include <sstream>
 #include <netinet/in.h>
 
 using std::string;
@@ -12,14 +13,28 @@ union sockaddr_union {
   sockaddr_in sin;
 };
 
+class ConnectionException : public std::runtime_error {
+public:
+    ConnectionException(std::string s)
+        :runtime_error(BuildErrorMessage(s)) {
+    }
+
+    string BuildErrorMessage(std::string s) {
+        return "ConnectionException: " + s;
+    }
+};
+
 class Connection {
     int socked_fd_;
 
-    // for reconnection
+    // for reconnecting
     string addr_;
     int port_;
 
     bool valid_;
+
+    void Send(void* data, size_t size);
+    void Recv(void* data, size_t size);
 
 public:
     Connection(int fd);
