@@ -4,6 +4,8 @@
 
 #include "Admin.h"
 
+#include <boost/filesystem.hpp>
+
 void Admin::GetArguments(int argc, char **argv) {
   po::options_description desc("Allowed options");
   desc.add_options()
@@ -57,15 +59,17 @@ bool Admin::IsInteractive() {
 }
 
 void Admin::BatchMode() {
+  // TODO: get rid of copy-paste code
   if (vm_.count("list-workers"))
-    cout << "Workers count " << connection_->GetWorkers().size() << endl;
+    cout << "Workers list:\n"
+         << connection_->GetWorkers();
 
   if (vm_.count("list-images"))
-    cout << "Images on server:\n"<< connection_->GetProcessImagesList() << endl;
-
+    cout << "Images on server:\n"
+         << connection_->GetProcessImagesList() << endl;
   if (vm_.count("upload-image")) {
     connection_->SendMsg("UPLOAD_IMAGE");
-    string imageName = vm_["upload-image"].as<string>();
+    string imageName = boost::filesystem::path(vm_["upload-image"].as<string>()).filename().string();
     connection_->SendMsg(imageName);
     ProcessImage pi(imageName);
     connection_->SendProcessImage(pi);
@@ -89,8 +93,8 @@ bool Admin::CommandParser() {
       break;
     }
     else if (*beg == "list_workers") {
-      cout << "Workers count "
-           << connection_->GetWorkers().size();
+      cout << "Workers list:\n"
+           << connection_->GetWorkers();
     }
     else if (*beg == "list_images") {
       cout << "Images on server:\n"
@@ -99,7 +103,7 @@ bool Admin::CommandParser() {
     else if (*beg == "upload_image") {
       connection_->SendMsg("UPLOAD_IMAGE");
       ++beg;
-      string imageName = *beg;
+      string imageName = boost::filesystem::path(*beg).filename().string();
       connection_->SendMsg(imageName);
       ProcessImage pi(imageName);
       connection_->SendProcessImage(pi);

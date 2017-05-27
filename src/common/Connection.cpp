@@ -106,11 +106,27 @@ void Connection::Recv(void* data, size_t size) {
 }
 
 Connection::Connection(int fd)
-    : socked_fd_(fd), valid_(true) {
+    : socked_fd_(fd), addr_(""), port_(-1), valid_(true) {
 
+    struct sockaddr_in addr;
+    socklen_t addr_size = sizeof(struct sockaddr_in);
+    int res = getpeername(socked_fd_, (struct sockaddr *)&addr, &addr_size);
+    if (res == -1) {
+        perror("error during getpeername");
+        valid_ = false;
+    } else {
+        // TODO: check this - ipv6 doesn't work
+        char clientip[20];
+        strcpy(clientip, inet_ntoa(addr.sin_addr));
+        addr_ = clientip;
+    }
 }
 
 bool Connection::Connect() {
+    if (port_ == -1) {
+        // TODO: get port
+        throw ConnectionException("Cannot reconnect, port is unknown.");
+    }
     auto soc = CreateSocket(addr_, port_);
     socked_fd_ = soc.first;
     if (socked_fd_ == -1) {

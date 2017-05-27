@@ -10,7 +10,7 @@ using std::make_unique;
 class Server;
 
 class Admin {
-    Connection connection_;
+    unique_ptr<Connection> connection_;
     Server& server_;
     unique_ptr<thread> thread_;
     bool closed_;
@@ -18,7 +18,7 @@ class Admin {
     bool ExecCmd();
     void Loop();
 public:
-    explicit Admin(int connect_id, Server&);
+    explicit Admin(unique_ptr<Connection>, Server&);
     ~Admin();
 
     bool Closed();

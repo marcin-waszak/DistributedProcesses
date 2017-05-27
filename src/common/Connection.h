@@ -42,7 +42,7 @@ public:
     Connection(int fd);
     Connection(const string& addr,int port);
     bool Connect();
-    bool Close();
+    virtual bool Close();
     bool Valid()const;
     static std::pair<int, sockaddr_union> CreateSocket(const string& addr, int port);
     ~Connection();
@@ -51,4 +51,6 @@ public:
 
     void SendProcessImage(const ProcessImage&);
     ProcessImage RecvProcessImage(fs::path targetFileLocation);
+
+    string GetAddress() { return addr_; }
 };
