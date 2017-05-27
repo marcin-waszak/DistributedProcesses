@@ -25,6 +25,12 @@ void Admin::GetArguments(int argc, char **argv) {
       exit(0);
     }
 
+    if (!vm.count("server-addr")) {
+      std::cerr << "Server address not given." << endl;
+      cout << desc << endl;
+      exit(1);
+    }
+
     server_address_ = vm["server-addr"].as<string>();
     server_port_ = vm["server-port"].as<int>();
   }
@@ -35,18 +41,51 @@ void Admin::GetArguments(int argc, char **argv) {
   }
 }
 
-//TODD: use tokenizer
+void Admin::Connect() {
+  connection_ = AdminServerConnection(server_address_, server_port_);
+
+  if (!connection_.Valid()) {
+    std::cerr << "Cannot connect to server." << endl;
+    exit(1);
+  }
+}
+
 bool Admin::CommandParser() {
   string command;
 
   for(;;) {
     cout << "> ";
     getline(cin, command);
-    cout << command << endl;
 
-    if(command == "exit")
-      return true;
+    boost::char_separator<char> sep(" \t");
+    boost::tokenizer<boost::char_separator<char>> tokens(command, sep);
 
-//    break;
+    auto beg = tokens.begin();
+
+    if (*beg == "exit") {
+      connection_.Close();
+      break;
+    }
+    else if (*beg == "list_workers") {
+      cout << "Workers count "
+           << connection_.GetWorkers().size();
+    }
+    else if (*beg == "list_images") {
+      cout << "Images on server:\n"
+           << connection_.GetProcessImagesList() << endl;
+    }
+    else if (*beg == "upload_image") {
+      connection_.SendMsg("UPLOAD_IMAGE");
+      ++beg;
+      string imageName = *beg;
+      connection_.SendMsg(imageName);
+      ProcessImage pi(imageName);
+      connection_.SendProcessImage(pi);
+    }
+    else {
+      cout << "Invalid command: " << *beg << endl;
+    }
   }
+
+  return true;
 }

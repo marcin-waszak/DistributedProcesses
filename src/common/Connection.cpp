@@ -79,6 +79,7 @@ std::pair<int, sockaddr_union> Connection::CreateSocket(const string& addr, int 
 }
 
 void Connection::Send(void* data, size_t size) {
+    if (!valid_) throw ConnectionException("Trying to use invalid connection.");
     int code = send(socked_fd_, data, size, 0);
     if (code == -1) {
         valid_ = false;
@@ -91,6 +92,7 @@ void Connection::Send(void* data, size_t size) {
     }
 }
 void Connection::Recv(void* data, size_t size) {
+    if (!valid_) throw ConnectionException("Trying to use invalid connection.");
     int code = recv(socked_fd_, data, size, 0);
     if (code == -1) {
         valid_ = false;
@@ -103,7 +105,14 @@ void Connection::Recv(void* data, size_t size) {
     }
 }
 
-Connection::Connection(int fd):socked_fd_(fd), valid_(true) {
+Connection::Connection()
+    : socked_fd_(-1), valid_(false) {
+
+}
+
+Connection::Connection(int fd)
+    : socked_fd_(fd), valid_(true) {
+
 }
 
 bool Connection::Connect() {
@@ -117,7 +126,7 @@ bool Connection::Connect() {
     std::cout << "Connecting to: " << addr_ << std::endl;
     if (connect(socked_fd_, (struct sockaddr *)&sa, sizeof sa) == -1) {
         perror("connect failed");
-
+        exit(1); // TODO: is exit apropriate here?
         if(close(socked_fd_) == -1)
             perror("close failed");
         valid_ = false;
@@ -125,6 +134,15 @@ bool Connection::Connect() {
     }
     valid_ = true;
     return true;
+}
+
+bool Connection::Close() {
+  if(close(socked_fd_) == -1) {
+    perror("close failed");
+    return false;
+  }
+
+  return true;
 }
 
 bool Connection::Valid()const {
@@ -173,7 +191,7 @@ ProcessImage Connection::RecvProcessImage(fs::path target) {
     file.open(target.string(), std::ios::out | std::ios::binary);
     // TODO: handle following error
     assert(file.is_open());
-    char buffer[255];
+    char buffer[256];
     unsigned size, total = 0;
     Recv(&size, sizeof(unsigned));
     while (total < size) {

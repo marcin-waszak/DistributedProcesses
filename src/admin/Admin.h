@@ -10,6 +10,8 @@
 #include <boost/program_options.hpp>
 #include <boost/tokenizer.hpp>
 
+#include "AdminServerConnection.h"
+
 namespace po = boost::program_options;
 using std::cout;
 using std::cerr;
@@ -22,10 +24,12 @@ class Admin {
 public:
   void GetArguments(int argc, char** argv);
   bool CommandParser();
+  void Connect();
 
 private:
   string server_address_;
   int server_port_;
+  AdminServerConnection connection_;
 };
 
 

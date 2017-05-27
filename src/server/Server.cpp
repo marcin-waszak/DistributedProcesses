@@ -4,9 +4,9 @@
 
 #include "Server.h"
 
-Server::Server():
-    next_admin_id_(0),
-    next_worker_id_(0) {
+Server::Server()
+    : next_admin_id_(0), next_worker_id_(0) {
+
 }
 
 bool Server::CleanThreads() {
@@ -98,7 +98,7 @@ void Server::GetArguments(int argc, char** argv) {
       ("help,h", "print help message")
       ("images-path,i", po::value<string>()->default_value("_server_images"),
        "relative path to directory with process images")
-      ("address,ap", po::value<string>()->default_value("localhost"), "Server address")
+      ("address,a", po::value<string>()->default_value("localhost"), "Server address")
       ("port,p", po::value<int>()->default_value(1100), "Port to listen at");
   po::positional_options_description pd;
   po::variables_map vm;
