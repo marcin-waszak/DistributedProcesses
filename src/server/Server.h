@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "Admin.h"
+#include "Worker.h"
 #include "../common/Connection.h"
 
 #include <sys/types.h>
@@ -42,20 +44,22 @@ public:
   void GetArguments(int argc, char** argv);
   bool ServerLoop();
   bool CleanThreads();
+  vector<ProcessImage> GetProcessImages();
+  fs::path GetImagesPath() { return images_path_; }
+  void AddProcessImage(ProcessImage);
 
 private:
-  void ThreadFunc(int connect_fd, unsigned session_id);
-  bool ExecCmd(Connection& connection);
 
   string address_str_;
   int port_;
   fs::path images_path_;
-//  also serialize this vector
+
+  mutex process_images_mutex_;
   vector<ProcessImage> process_images_;
 
-  unsigned session_id_;
-  std::mutex sessions_to_close_mutex_;
-  map<int, unique_ptr<thread>> sessions_;
-  vector<int> sessions_to_close_;
-};
+  map<int, unique_ptr<Admin>> admins_;
+  map<int, unique_ptr<Worker>> workers_;
 
+  int next_admin_id_;
+  int next_worker_id_;
+};

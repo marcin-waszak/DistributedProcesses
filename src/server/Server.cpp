@@ -4,91 +4,28 @@
 
 #include "Server.h"
 
-Server::Server() : session_id_(0) {
-
-}
-
-void Server::ThreadFunc(int connect_fd, unsigned session_id) {
-  Connection connection(connect_fd);
-
-  for (;;) {
-    try {
-      if (!ExecCmd(connection))
-        break;
-    } catch (ConnectionException) {
-      cerr << "Admin disconnected" << endl;
-      break;
-    }
-  }
-
-  sessions_to_close_mutex_.lock();
-  sessions_to_close_.push_back(session_id);
-  sessions_to_close_mutex_.unlock();
+Server::Server():
+    next_admin_id_(0),
+    next_worker_id_(0) {
 }
 
 bool Server::CleanThreads() {
-  sessions_to_close_mutex_.lock();
-
-  while(!sessions_to_close_.empty()) {
-    auto session_id = sessions_to_close_.back();
-    if (sessions_.at(session_id)->joinable())
-      sessions_.at(session_id)->join();
-    sessions_.erase(session_id); // TODO: if not exist return false
-    sessions_to_close_.pop_back();
+  for (auto i = admins_.begin(); i != admins_.end(); ) {
+      if (i->second->Closed()) {
+          std::cout << "Erasing Admin id: " << i->first << endl;
+          i = admins_.erase(i);
+      } else ++i;
   }
-
-  sessions_to_close_mutex_.unlock();
-  return true;
-}
-
-bool Server::ExecCmd(Connection& connection) {
-  string msg = connection.RecvMsg();
-  cout << "got command: " << msg << endl;
-  if (msg == "GET_WORKERS") {
-    // workers not implemented yet
-    string resp = "0";
-    cout << "responding: " << resp << endl;
-    connection.SendMsg(resp);
-  } else if (msg == "GET_IMAGES_LIST") {
-    if (process_images_.empty()) {
-      string resp = "<empty>";
-      connection.SendMsg(resp);
-      cout << "responding:" << resp << endl;
-    } else {
-      ostringstream oss;
-      for (ProcessImage& pi : process_images_) {
-        oss << pi.GetPath() << endl;
-      }
-      cout << "responding:\n" << oss.str() << endl;
-      connection.SendMsg(oss.str());
-    }
-  } else if (msg == "UPLOAD_IMAGE") {
-    string name = connection.RecvMsg();
-    fs::path filePath = images_path_ / name;
-    ProcessImage pi = connection.RecvProcessImage(filePath);
-    cout << "image saved: " << filePath << endl;
-    bool found = false;
-    for (auto& p : process_images_) {
-      if (p.GetPath() == pi.GetPath()) {
-        found = true;
-        break;
-      }
-    }
-    if (!found)
-      process_images_.push_back(pi);
-  } else {
-    cout << "unknown command, ignoring" << endl;
+  for (auto i = workers_.begin(); i != workers_.end(); ) {
+      if (i->second->Closed()) {
+          std::cout << "Erasing Admin id: " << i->first << endl;
+          i = workers_.erase(i);
+      } else ++i;
   }
-
-  // false on connection close
   return true;
 }
 
 bool Server::ServerLoop() {
-  /*
-  * This is temporary implementation of server for debugging
-  * TODO: implement properly
-  * */
   auto soc = Connection::CreateSocket(address_str_, port_);
   int socket_fd = soc.first;
   sockaddr_union sa = soc.second;
@@ -140,15 +77,12 @@ bool Server::ServerLoop() {
     }
 
     cerr << "Accept success\n";
-    cout << "----new client---" << endl;
 
-    sessions_to_close_mutex_.lock();
-    ++session_id_;
-    sessions_to_close_mutex_.unlock();
-
-    sessions_.insert(make_pair(session_id_, make_unique<thread>(
-        thread(&Server::ThreadFunc, this, connect_fd, session_id_))));
-
+    // TODO: accept workers
+    cout << "----new admin--- id: " << next_admin_id_ << endl;
+    Server& srv = *this;
+    admins_[next_admin_id_] = make_unique<Admin>(connect_fd, srv);
+    ++next_admin_id_;
   }
 
   if(close(socket_fd) < 0)
@@ -193,4 +127,14 @@ void Server::GetArguments(int argc, char** argv) {
     cerr << desc << endl;
     exit(1);
   }
+}
+
+vector<ProcessImage> Server::GetProcessImages() {
+    std::lock_guard<std::mutex> lock(process_images_mutex_);
+    return vector<ProcessImage>(process_images_);
+}
+
+void Server::AddProcessImage(ProcessImage pi) {
+    std::lock_guard<std::mutex> lock(process_images_mutex_);
+    process_images_.push_back(pi);
 }
