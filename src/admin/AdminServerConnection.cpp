@@ -1,7 +1,7 @@
 #include "AdminServerConnection.h"
 
-
-AdminServerConnection::AdminServerConnection(const string& serverAddr, int port) : Connection(serverAddr,port) {
+AdminServerConnection::AdminServerConnection(const string& serverAddr, int port)
+    : Connection(serverAddr,port) {
     // TODO: implement properly
 }
 
