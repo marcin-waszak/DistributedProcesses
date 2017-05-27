@@ -8,31 +8,33 @@ void Admin::GetArguments(int argc, char **argv) {
   po::options_description desc("Allowed options");
   desc.add_options()
       ("help,h", "print help message")
+      ("interactive,i", "interactive mode")
       ("server-addr,a", po::value<string>(), "server address (ipv4 or ipv6)")
-      ("server-port,p", po::value<int>()->default_value(1100), "server port");
+      ("server-port,p", po::value<int>()->default_value(1100), "server port")
+      ("list-workers,l", "list workers")
+      ("list-images,g", "list process images deployed on server")
+      ("upload-image,u", po::value<string>(), "upload image server (local file path should be given)");
   po::positional_options_description pd;
   pd.add("server-addr", 1);
 
-  po::variables_map vm;
-
   try {
     po::store(po::command_line_parser(argc, argv).
-        options(desc).positional(pd).run(), vm);
-    po::notify(vm);
+        options(desc).positional(pd).run(), vm_);
+    po::notify(vm_);
 
-    if (vm.count("help")) {
+    if (vm_.count("help")) {
       cout << desc << endl;
       exit(0);
     }
 
-    if (!vm.count("server-addr")) {
+    if (!vm_.count("server-addr")) {
       std::cerr << "Server address not given." << endl;
       cout << desc << endl;
       exit(1);
     }
 
-    server_address_ = vm["server-addr"].as<string>();
-    server_port_ = vm["server-port"].as<int>();
+    server_address_ = vm_["server-addr"].as<string>();
+    server_port_ = vm_["server-port"].as<int>();
   }
   catch(po::error& e) {
     cerr << "ERROR: " << e.what() << endl << endl;
@@ -42,11 +44,31 @@ void Admin::GetArguments(int argc, char **argv) {
 }
 
 void Admin::Connect() {
-  connection_ = AdminServerConnection(server_address_, server_port_);
+  connection_ = make_unique<AdminServerConnection>(server_address_, server_port_);
 
-  if (!connection_.Valid()) {
+  if (!connection_->Valid()) {
     std::cerr << "Cannot connect to server." << endl;
     exit(1);
+  }
+}
+
+bool Admin::IsInteractive() {
+  return static_cast<bool>(vm_.count("interactive"));
+}
+
+void Admin::BatchMode() {
+  if (vm_.count("list-workers"))
+    cout << "Workers count " << connection_->GetWorkers().size() << endl;
+
+  if (vm_.count("list-images"))
+    cout << "Images on server:\n"<< connection_->GetProcessImagesList() << endl;
+
+  if (vm_.count("upload-image")) {
+    connection_->SendMsg("UPLOAD_IMAGE");
+    string imageName = vm_["upload-image"].as<string>();
+    connection_->SendMsg(imageName);
+    ProcessImage pi(imageName);
+    connection_->SendProcessImage(pi);
   }
 }
 
@@ -54,7 +76,7 @@ bool Admin::CommandParser() {
   string command;
 
   for(;;) {
-    cout << "> ";
+    cout << "\n> ";
     getline(cin, command);
 
     boost::char_separator<char> sep(" \t");
@@ -63,24 +85,24 @@ bool Admin::CommandParser() {
     auto beg = tokens.begin();
 
     if (*beg == "exit") {
-      connection_.Close();
+      connection_->Close();
       break;
     }
     else if (*beg == "list_workers") {
       cout << "Workers count "
-           << connection_.GetWorkers().size();
+           << connection_->GetWorkers().size();
     }
     else if (*beg == "list_images") {
       cout << "Images on server:\n"
-           << connection_.GetProcessImagesList() << endl;
+           << connection_->GetProcessImagesList() << endl;
     }
     else if (*beg == "upload_image") {
-      connection_.SendMsg("UPLOAD_IMAGE");
+      connection_->SendMsg("UPLOAD_IMAGE");
       ++beg;
       string imageName = *beg;
-      connection_.SendMsg(imageName);
+      connection_->SendMsg(imageName);
       ProcessImage pi(imageName);
-      connection_.SendProcessImage(pi);
+      connection_->SendProcessImage(pi);
     }
     else {
       cout << "Invalid command: " << *beg << endl;

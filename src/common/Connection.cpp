@@ -105,11 +105,6 @@ void Connection::Recv(void* data, size_t size) {
     }
 }
 
-Connection::Connection()
-    : socked_fd_(-1), valid_(false) {
-
-}
-
 Connection::Connection(int fd)
     : socked_fd_(fd), valid_(true) {
 

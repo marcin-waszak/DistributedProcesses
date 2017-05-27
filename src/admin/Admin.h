@@ -7,6 +7,7 @@
 
 #include <string>
 #include <iostream>
+#include <memory>
 #include <boost/program_options.hpp>
 #include <boost/tokenizer.hpp>
 
@@ -19,17 +20,22 @@ using std::endl;
 using std::string;
 using std::getline;
 using std::cin;
+using std::unique_ptr;
+using std::make_unique;
 
 class Admin {
 public:
   void GetArguments(int argc, char** argv);
+  bool IsInteractive();
+  void BatchMode();
   bool CommandParser();
   void Connect();
 
 private:
   string server_address_;
   int server_port_;
-  AdminServerConnection connection_;
+  po::variables_map vm_;
+  unique_ptr<AdminServerConnection> connection_;
 };
 
 

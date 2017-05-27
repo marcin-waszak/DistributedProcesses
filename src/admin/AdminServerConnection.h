@@ -10,7 +10,6 @@ using std::shared_ptr;
 
 class AdminServerConnection : public Connection{
 public:
-    AdminServerConnection();
     AdminServerConnection(const string&, int port);
     vector<shared_ptr<Worker>> GetWorkers();
     string GetProcessImagesList();

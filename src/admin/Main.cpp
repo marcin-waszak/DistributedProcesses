@@ -7,13 +7,15 @@ using std::endl;
 using std::string;
 
 int main(int argc, char* argv[]) {
-    // TODO: implement properly
-
     Admin admin;
 
     admin.GetArguments(argc, argv);
     admin.Connect();
-    admin.CommandParser();
+
+    if (admin.IsInteractive())
+        admin.CommandParser();
+    else
+        admin.BatchMode();
 
     return 0;
 }

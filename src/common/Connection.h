@@ -33,11 +33,12 @@ class Connection {
 
     bool valid_;
 
+    Connection(const Connection&) = delete;
+    Connection& operator=(Connection const&) = delete;
     void Send(void* data, size_t size);
     void Recv(void* data, size_t size);
 
 public:
-    Connection();
     Connection(int fd);
     Connection(const string& addr,int port);
     bool Connect();
