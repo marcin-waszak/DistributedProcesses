@@ -21,18 +21,17 @@ void Server::ThreadFunc(int connect_fd, unsigned session_id) {
     }
   }
 
-  // TODO: synchronization
   sessions_to_close_mutex_.lock();
   sessions_to_close_.push_back(session_id);
   sessions_to_close_mutex_.unlock();
 }
 
-bool Server::CleanThreads() { // TODO: sometimes crashes due to nonexistent map key
+bool Server::CleanThreads() {
   sessions_to_close_mutex_.lock();
 
   while(!sessions_to_close_.empty()) {
     auto session_id = sessions_to_close_.back();
-    if(sessions_.at(session_id)->joinable())
+    if (sessions_.at(session_id)->joinable())
       sessions_.at(session_id)->join();
     sessions_.erase(session_id); // TODO: if not exist return false
     sessions_to_close_.pop_back();

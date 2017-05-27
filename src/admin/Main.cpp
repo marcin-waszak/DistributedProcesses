@@ -1,4 +1,5 @@
 #include "AdminServerConnection.h"
+#include "Admin.h"
 
 #include <boost/program_options.hpp>
 
@@ -22,61 +23,47 @@ AdminServerConnection CreateServerConnection(po::variables_map vm) {
 int main(int argc, char* argv[]) {
     // TODO: implement properly
 
-    po::options_description desc("Allowed options");
-    desc.add_options()
-        ("help,h", "print help message")
-        ("list-workers,l", "list workers")
-        ("list-images", "list process images deployed on server")
-        ("upload-image,u", po::value<string>(), "upload image server (local file path should be given)")
-        ("server-addr", po::value<string>(), "server address (ipv4 or ipv6)")
-        ("server-port,p", po::value<int>()->default_value(1100), "server port");
-    po::positional_options_description pd;
-    pd.add("server-addr", 1);
+    Admin admin;
 
-    po::variables_map vm;
-    po::store(po::command_line_parser(argc, argv).
-          options(desc).positional(pd).run(), vm);
-    po::notify(vm);
+    admin.GetArguments(argc, argv);
 
-    if (vm.count("help")) {
-        cout << desc << endl;
-        return 0;
-    }
+    admin.CommandParser();
 
-    if (vm.count("list-workers")) {
-        AdminServerConnection connection = CreateServerConnection(vm);
-        if (!connection.Valid()) {
-            std::cerr << "Cannot connect to server." << endl;
-            return 1;
-        }
-        cout << "Workers count " << connection.GetWorkers().size() << endl;
-        return 0;
-    }
 
-    if (vm.count("list-images")) {
-        AdminServerConnection connection = CreateServerConnection(vm);
-        if (!connection.Valid()) {
-            std::cerr << "Cannot connect to server." << endl;
-            return 1;
-        }
-        cout << "Images on server:\n"<< connection.GetProcessImagesList() << endl;
-        return 0;
-    }
+//    if (vm.count("list-workers")) {
+//        AdminServerConnection connection = CreateServerConnection(vm);
+//        if (!connection.Valid()) {
+//            std::cerr << "Cannot connect to server." << endl;
+//            return 1;
+//        }
+//        cout << "Workers count " << connection.GetWorkers().size() << endl;
+//        return 0;
+//    }
+//
+//    if (vm.count("list-images")) {
+//        AdminServerConnection connection = CreateServerConnection(vm);
+//        if (!connection.Valid()) {
+//            std::cerr << "Cannot connect to server." << endl;
+//            return 1;
+//        }
+//        cout << "Images on server:\n"<< connection.GetProcessImagesList() << endl;
+//        return 0;
+//    }
+//
+//    if (vm.count("upload-image")) {
+//        AdminServerConnection connection = CreateServerConnection(vm);
+//        if (!connection.Valid()) {
+//            std::cerr << "Cannot connect to server." << endl;
+//            return 1;
+//        }
+//        connection.SendMsg("UPLOAD_IMAGE");
+//        string imageName = vm["upload-image"].as<string>();
+//        connection.SendMsg(imageName);
+//        ProcessImage pi(imageName);
+//        connection.SendProcessImage(pi);
+//        return 0;
+//    }
 
-    if (vm.count("upload-image")) {
-        AdminServerConnection connection = CreateServerConnection(vm);
-        if (!connection.Valid()) {
-            std::cerr << "Cannot connect to server." << endl;
-            return 1;
-        }
-        connection.SendMsg("UPLOAD_IMAGE");
-        string imageName = vm["upload-image"].as<string>();
-        connection.SendMsg(imageName);
-        ProcessImage pi(imageName);
-        connection.SendProcessImage(pi);
-        return 0;
-    }
-
-    cout << desc << endl;
+//    cout << desc << endl;
     return 0;
 }

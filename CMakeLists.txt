@@ -11,7 +11,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wshadow")
 
 # Executables
-add_executable (admin "${PROJECT_SOURCE_DIR}/src/admin/Main.cpp")
+add_executable (admin "${PROJECT_SOURCE_DIR}/src/admin/Main.cpp" src/admin/Admin.cpp src/admin/Admin.h)
 add_executable (server "${PROJECT_SOURCE_DIR}/src/server/Main.cpp" src/server/Server.cpp src/server/Server.h)
 add_executable (worker "${PROJECT_SOURCE_DIR}/src/worker/Main.cpp")
 target_link_libraries (admin AdminServerConnection)
