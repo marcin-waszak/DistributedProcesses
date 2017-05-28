@@ -6,11 +6,11 @@ using std::cerr;
 using std::cout;
 using std::endl;
 
-Admin::Admin(unique_ptr<Connection> conn, Server& srv)
-        : connection_(std::move(conn)),
-        server_(srv),
+Admin::Admin(unique_ptr<Connection> connection, Server& server)
+        : connection_(std::move(connection)),
+        server_(server),
         closed_(false) {
-    thread_ = make_unique<thread>(thread(&Admin::Loop, this));
+    thread_ = make_unique<thread>(&Admin::Loop, this);
 }
 
 Admin::~Admin() {
@@ -41,7 +41,7 @@ bool Admin::ExecCmd() {
             resp = "<empty>\n";
         } else {
             ostringstream ss;
-            for (auto w : wids) {
+            for (auto& w : wids) {
                 ss << w << " -> "
                    << server_.GetWorker(w)->GetAddress() << endl;
             }

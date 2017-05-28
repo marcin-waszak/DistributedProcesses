@@ -8,10 +8,10 @@
 using std::vector;
 using std::shared_ptr;
 
-class AdminServerConnection : public Connection{
+class AdminServerConnection : public Connection {
 public:
-    AdminServerConnection(const string&, int port);
+    AdminServerConnection(const string& address, int port);
     string GetWorkers();
     string GetProcessImagesList();
-    virtual bool Close();
+    bool Close() override;
 };

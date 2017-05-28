@@ -28,7 +28,7 @@ class Connection {
     int socked_fd_;
 
     // for reconnecting
-    string addr_;
+    string address_;
     int port_;
 
     bool valid_;
@@ -52,5 +52,5 @@ public:
     void SendProcessImage(const ProcessImage&);
     ProcessImage RecvProcessImage(fs::path targetFileLocation);
 
-    string GetAddress() { return addr_; }
+    string GetAddress() { return address_; }
 };

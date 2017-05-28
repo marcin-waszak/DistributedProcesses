@@ -35,8 +35,10 @@ using std::shared_ptr;
 using std::thread;
 using std::ostringstream;
 using std::map;
+using std::pair;
 using std::vector;
 using std::mutex;
+using std::lock_guard;
 
 class Server {
 public:

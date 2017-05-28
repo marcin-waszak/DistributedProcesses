@@ -4,8 +4,6 @@
 
 #include "Admin.h"
 
-#include <boost/filesystem.hpp>
-
 void Admin::GetArguments(int argc, char **argv) {
   po::options_description desc("Allowed options");
   desc.add_options()
@@ -69,7 +67,8 @@ void Admin::BatchMode() {
          << connection_->GetProcessImagesList() << endl;
   if (vm_.count("upload-image")) {
     connection_->SendMsg("UPLOAD_IMAGE");
-    string imageName = boost::filesystem::path(vm_["upload-image"].as<string>()).filename().string();
+    string imageName = boost::filesystem::path(
+        vm_["upload-image"].as<string>()).filename().string();
     connection_->SendMsg(imageName);
     ProcessImage pi(imageName);
     connection_->SendProcessImage(pi);

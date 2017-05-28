@@ -7,11 +7,11 @@ using std::cerr;
 using std::cout;
 using std::endl;
 
-Worker::Worker(unique_ptr<Connection> conn, Server& srv)
-        : connection_(std::move(conn)),
-        server_(srv),
+Worker::Worker(unique_ptr<Connection> connection, Server& server)
+        : connection_(std::move(connection)),
+        server_(server),
         closed_(false) {
-    thread_ = make_unique<thread>(thread(&Worker::Loop, this));
+    thread_ = make_unique<thread>(&Worker::Loop, this);
 }
 
 Worker::~Worker() {
