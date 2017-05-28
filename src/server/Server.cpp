@@ -18,7 +18,7 @@ bool Server::CleanThreads() {
   }
   for (auto i = workers_.begin(); i != workers_.end(); ) {
       if (i->second->Closed()) {
-          cout << "Erasing Admin id: " << i->first << endl;
+          cout << "Erasing Worker id: " << i->first << endl;
           i = workers_.erase(i);
       } else ++i;
   }

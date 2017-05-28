@@ -68,12 +68,8 @@ void Admin::BatchMode() {
     cout << "Images on server:\n"
          << connection_->GetProcessImagesList() << endl;
   if (vm_.count("upload-image")) {
-    connection_->SendMsg("UPLOAD_IMAGE");
-    string imageName = boost::filesystem::path(
-        vm_["upload-image"].as<string>()).filename().string();
-    connection_->SendMsg(imageName);
-    ProcessImage pi(imageName);
-    connection_->SendProcessImage(pi);
+    string imagePath = vm_["upload-image"].as<string>();
+    connection_->UploadImage(imagePath);
   }
 }
 
@@ -111,16 +107,8 @@ void Admin::parseCommand(string command) {
          << connection_->GetProcessImagesList() << endl;
   }
   else if (command.find("upload_image") == 0) {
-    connection_->SendMsg("UPLOAD_IMAGE");
-    string fileName = command.substr(command.find(" ") + 1);
-    if (fileName.empty() || !boost::filesystem::exists(fileName)) {
-      cout << "File does not exist: " << fileName << endl;
-      return;
-    }
-    string imageName = boost::filesystem::path(fileName).filename().string();
-    connection_->SendMsg(imageName);
-    ProcessImage pi(imageName);
-    connection_->SendProcessImage(pi);
+    string imagePath = command.substr(command.find(" ") + 1);
+    connection_->UploadImage(imagePath);
   }
   else {
     cout << "Invalid command: " << command << endl;
