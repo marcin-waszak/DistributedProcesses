@@ -3,6 +3,8 @@
 //
 
 #include "Admin.h"
+#include <readline/readline.h>
+#include <readline/history.h>
 
 void Admin::GetArguments(int argc, char **argv) {
   po::options_description desc("Allowed options");
@@ -76,41 +78,51 @@ void Admin::BatchMode() {
 }
 
 bool Admin::CommandParser() {
-  string command;
+  const char* prompt = "> ";
+  char *input;
 
-  for(;;) {
-    cout << "\n> ";
-    getline(cin, command);
+  rl_bind_key('\t', rl_complete);
 
-    boost::char_separator<char> sep(" \t");
-    boost::tokenizer<boost::char_separator<char>> tokens(command, sep);
+  for (;;) {
+    cout << "\n>";
+    input = readline(prompt);
+    add_history(input);
 
-    auto beg = tokens.begin();
+    cout << input << endl;
 
-    if (*beg == "exit") {
+    if (!input || !strcmp(input, "exit")) {
       connection_->Close();
       break;
     }
-    else if (*beg == "list_workers") {
-      cout << "Workers list:\n"
-           << connection_->GetWorkers();
-    }
-    else if (*beg == "list_images") {
-      cout << "Images on server:\n"
-           << connection_->GetProcessImagesList() << endl;
-    }
-    else if (*beg == "upload_image") {
-      connection_->SendMsg("UPLOAD_IMAGE");
-      ++beg;
-      string imageName = boost::filesystem::path(*beg).filename().string();
-      connection_->SendMsg(imageName);
-      ProcessImage pi(imageName);
-      connection_->SendProcessImage(pi);
-    }
-    else {
-      cout << "Invalid command: " << *beg << endl;
-    }
+
+    parseCommand(input);
   }
 
   return true;
+}
+
+void Admin::parseCommand(string command) {
+  if (command == "list_workers") {
+    cout << "Workers list:\n"
+         << connection_->GetWorkers();
+  }
+  else if (command == "list_images") {
+    cout << "Images on server:\n"
+         << connection_->GetProcessImagesList() << endl;
+  }
+  else if (command.find("upload_image") == 0) {
+    connection_->SendMsg("UPLOAD_IMAGE");
+    string fileName = command.substr(command.find(" ") + 1);
+    if (fileName.empty() || !boost::filesystem::exists(fileName)) {
+      cout << "File does not exist: " << fileName << endl;
+      return;
+    }
+    string imageName = boost::filesystem::path(fileName).filename().string();
+    connection_->SendMsg(imageName);
+    ProcessImage pi(imageName);
+    connection_->SendProcessImage(pi);
+  }
+  else {
+    cout << "Invalid command: " << command << endl;
+  }
 }
