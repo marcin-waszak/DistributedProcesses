@@ -38,7 +38,10 @@ private:
   po::variables_map vm_;
   unique_ptr<AdminServerConnection> connection_;
 
-  void parseCommand(string);
+  void ParseCommand(string);
+  void ListWorkers() const;
+  void ListImages() const;
+  void UploadImage(const string &imagePath) const;
 };
 
 

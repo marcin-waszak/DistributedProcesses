@@ -59,17 +59,15 @@ bool Admin::IsInteractive() {
 }
 
 void Admin::BatchMode() {
-  // TODO: get rid of copy-paste code
-  if (vm_.count("list-workers"))
-    cout << "Workers list:\n"
-         << connection_->GetWorkers();
-
-  if (vm_.count("list-images"))
-    cout << "Images on server:\n"
-         << connection_->GetProcessImagesList() << endl;
+  if (vm_.count("list-workers")) {
+    ListWorkers();
+  }
+  if (vm_.count("list-images")) {
+    ListImages();
+  }
   if (vm_.count("upload-image")) {
     string imagePath = vm_["upload-image"].as<string>();
-    connection_->UploadImage(imagePath);
+    UploadImage(imagePath);
   }
 }
 
@@ -80,27 +78,33 @@ bool Admin::CommandParser() {
   rl_bind_key('\t', rl_complete);
 
   for (;;) {
-    cout << "\n>";
     input = readline(prompt);
     add_history(input);
 
-    cout << input << endl;
-
     if (!input || !strcmp(input, "exit")) {
-      connection_->Close();
-      break;
+        connection_->Close();
+        break;
     }
-
-    parseCommand(input);
+    ParseCommand(input);
   }
-
   return true;
 }
 
-void Admin::parseCommand(string command) {
+void Admin::ListWorkers() const {
+    cout << "Workers list:\n" << connection_->GetWorkers();
+}
+
+void Admin::ListImages() const {
+  cout << "Images on server:\n" << connection_->GetProcessImagesList() << endl;
+}
+
+void Admin::UploadImage(const string &imagePath) const {
+  connection_->UploadImage(imagePath);
+}
+
+void Admin::ParseCommand(string command) {
   if (command == "list_workers") {
-    cout << "Workers list:\n"
-         << connection_->GetWorkers();
+    ListWorkers();
   }
   else if (command == "list_images") {
     cout << "Images on server:\n"
