@@ -3,8 +3,10 @@
 //
 
 #include "Admin.h"
+#include <boost/algorithm/string.hpp>
 #include <readline/readline.h>
 #include <readline/history.h>
+
 
 void Admin::GetArguments(int argc, char **argv) {
   po::options_description desc("Allowed options");
@@ -68,8 +70,8 @@ void Admin::BatchMode() {
     cout << "Images on server:\n"
          << connection_->GetProcessImagesList() << endl;
   if (vm_.count("upload-image")) {
-    string imagePath = vm_["upload-image"].as<string>();
-    connection_->UploadImage(imagePath);
+    string image_path = vm_["upload-image"].as<string>();
+    connection_->UploadImage(image_path);
   }
 }
 
@@ -98,17 +100,32 @@ bool Admin::CommandParser() {
 }
 
 void Admin::parseCommand(string command) {
-  if (command == "list_workers") {
+  std::vector<std::string> elems;
+  boost::split(elems, command, boost::is_any_of("\t "));
+
+  string cmd = elems[0];
+  boost::trim(cmd);
+  if (cmd == "list_workers") {
     cout << "Workers list:\n"
          << connection_->GetWorkers();
   }
-  else if (command == "list_images") {
+  else if (cmd == "list_images") {
     cout << "Images on server:\n"
          << connection_->GetProcessImagesList() << endl;
   }
-  else if (command.find("upload_image") == 0) {
-    string imagePath = command.substr(command.find(" ") + 1);
-    connection_->UploadImage(imagePath);
+  else if (cmd == "upload_image") {
+    string image_path = command.substr(command.find(" ") + 1);
+    cout << connection_->UploadImage(image_path) << endl;
+  }
+  else if (cmd == "list_workers_images") {
+    cout << "Workers images list:\n"
+         << connection_->GetWorkersImages();
+  }
+  else if (cmd == "upload_image_worker") {
+    if (elems.size() != 3)
+      cerr << "Wrong arguments count" << endl;
+    else
+      cout << connection_->UploadImageWorker(elems[1], elems[2]) << endl;
   }
   else {
     cout << "Invalid command: " << command << endl;

@@ -178,10 +178,14 @@ vector<int> Server::GetWorkerIDs()const {
 
 shared_ptr<Admin> Server::GetAdmin(int i)const {
   lock_guard<mutex> lock(admins_mutex_);
+  if (!admins_.count(i))
+      throw ServerExeption("Get admin key error.");
   return admins_.at(i);
 }
 
 shared_ptr<Worker> Server::GetWorker(int i)const {
   lock_guard<mutex> lock(workers_mutex_);
+  if (!workers_.count(i))
+      throw ServerExeption("Get worker error.");
   return workers_.at(i);
 }

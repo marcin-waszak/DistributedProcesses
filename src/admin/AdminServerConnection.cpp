@@ -19,21 +19,36 @@ string AdminServerConnection::GetProcessImagesList() {
     return RecvMsg();
 }
 
-void AdminServerConnection::UploadImage(string imagePath) {
+string AdminServerConnection::UploadImage(string imagePath) {
     boost::trim(imagePath);
     if (imagePath.empty() || !boost::filesystem::exists(imagePath)) {
         std::cout << "File does not exist: " << imagePath << std::endl;
-      return;
+        return "File does not exist";
     }
     SendMsg("UPLOAD_IMAGE");
     string imageName = boost::filesystem::path(imagePath).filename().string();
     SendMsg(imageName);
     ProcessImage pi(imagePath);
     SendProcessImage(pi);
+    return RecvMsg();
+}
+
+string AdminServerConnection::GetWorkersImages() {
+    SendMsg("GET_WORKERS_IMAGES");
+    return RecvMsg();
 }
 
 bool AdminServerConnection::Close() {
     SendMsg("CLOSE");
     Connection::Close();
     return true;
+}
+
+string AdminServerConnection::UploadImageWorker(string imageName, string workerId) {
+    boost::trim(imageName);
+    boost::trim(workerId);
+    SendMsg("UPLOAD_IMAGE_WORKER");
+    SendMsg(imageName);
+    SendMsg(workerId);
+    return RecvMsg();
 }
