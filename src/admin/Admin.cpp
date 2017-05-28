@@ -82,8 +82,8 @@ bool Admin::CommandParser() {
     add_history(input);
 
     if (!input || !strcmp(input, "exit")) {
-        connection_->Close();
-        break;
+      connection_->Close();
+      break;
     }
     ParseCommand(input);
   }
@@ -91,11 +91,13 @@ bool Admin::CommandParser() {
 }
 
 void Admin::ListWorkers() const {
-    cout << "Workers list:\n" << connection_->GetWorkers();
+  cout << "Workers list:\n"
+       << connection_->GetWorkers();
 }
 
 void Admin::ListImages() const {
-  cout << "Images on server:\n" << connection_->GetProcessImagesList() << endl;
+  cout << "Images on server:\n"
+       << connection_->GetProcessImagesList() << endl;
 }
 
 void Admin::UploadImage(const string &imagePath) const {
