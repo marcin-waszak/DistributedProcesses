@@ -13,6 +13,7 @@ void Admin::GetArguments(int argc, char **argv) {
   desc.add_options()
       ("help,h", "print help message")
       ("interactive,i", "interactive mode")
+      ("debug,d", "debug mode")
       ("server-addr,a", po::value<string>(), "server address (ipv4 or ipv6)")
       ("server-port,p", po::value<int>()->default_value(1100), "server port")
       ("list-workers,l", "list workers")
@@ -36,6 +37,8 @@ void Admin::GetArguments(int argc, char **argv) {
       cout << desc << endl;
       exit(1);
     }
+
+    Log::Enable = !vm_.count("debug");
 
     server_address_ = vm_["server-addr"].as<string>();
     server_port_ = vm_["server-port"].as<int>();

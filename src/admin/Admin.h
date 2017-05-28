@@ -13,6 +13,7 @@
 #include <boost/tokenizer.hpp>
 
 #include "AdminServerConnection.h"
+#include "../common/Log.h"
 
 namespace po = boost::program_options;
 using std::cout;
