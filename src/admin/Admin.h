@@ -37,6 +37,8 @@ private:
   int server_port_;
   po::variables_map vm_;
   unique_ptr<AdminServerConnection> connection_;
+
+  void parseCommand(string);
 };
 
 

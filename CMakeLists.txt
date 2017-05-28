@@ -18,6 +18,7 @@ target_link_libraries (admin AdminServerConnection)
 target_link_libraries (admin Connection)
 target_link_libraries (admin ProcessImage)
 target_link_libraries (admin boost_program_options)
+target_link_libraries (admin readline)
 
 target_link_libraries (server ServerWorker)
 target_link_libraries (server ServerAdmin)
