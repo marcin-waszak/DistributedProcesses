@@ -31,12 +31,14 @@ using std::endl;
 using std::string;
 using std::make_pair;
 using std::make_unique;
-using std::unique_ptr;
+using std::shared_ptr;
 using std::thread;
 using std::ostringstream;
 using std::map;
+using std::pair;
 using std::vector;
 using std::mutex;
+using std::lock_guard;
 
 class Server {
 public:
@@ -44,9 +46,14 @@ public:
   void GetArguments(int argc, char** argv);
   bool ServerLoop();
   bool CleanThreads();
-  vector<ProcessImage> GetProcessImages();
+  vector<ProcessImage> GetProcessImages()const;
   fs::path GetImagesPath() { return images_path_; }
   void AddProcessImage(ProcessImage);
+
+  vector<int> GetAdminIDs()const;
+  vector<int> GetWorkerIDs()const;
+  shared_ptr<Admin> GetAdmin(int)const;
+  shared_ptr<Worker> GetWorker(int)const;
 
 private:
 
@@ -54,11 +61,13 @@ private:
   int port_;
   fs::path images_path_;
 
-  mutex process_images_mutex_;
+  mutable mutex process_images_mutex_;
   vector<ProcessImage> process_images_;
 
-  map<int, unique_ptr<Admin>> admins_;
-  map<int, unique_ptr<Worker>> workers_;
+  mutable mutex admins_mutex_;
+  mutable mutex workers_mutex_;
+  map<int, shared_ptr<Admin>> admins_;
+  map<int, shared_ptr<Worker>> workers_;
 
   int next_admin_id_;
   int next_worker_id_;

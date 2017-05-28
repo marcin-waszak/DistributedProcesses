@@ -14,6 +14,7 @@ Worker::Worker(const string& addr,int port, fs::path images_path):
                   << images_path_ << std::endl;
         fs::create_directory(images_path_);
     }
+    server_connection_.SendMsg("WORKER");
 }
 
 void Worker::ExecCmd(const string& msg) {

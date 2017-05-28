@@ -12,13 +12,13 @@ Server::Server()
 bool Server::CleanThreads() {
   for (auto i = admins_.begin(); i != admins_.end(); ) {
       if (i->second->Closed()) {
-          std::cout << "Erasing Admin id: " << i->first << endl;
+          cout << "Erasing Admin id: " << i->first << endl;
           i = admins_.erase(i);
       } else ++i;
   }
   for (auto i = workers_.begin(); i != workers_.end(); ) {
       if (i->second->Closed()) {
-          std::cout << "Erasing Admin id: " << i->first << endl;
+          cout << "Erasing Admin id: " << i->first << endl;
           i = workers_.erase(i);
       } else ++i;
   }
@@ -77,12 +77,31 @@ bool Server::ServerLoop() {
     }
 
     cerr << "Accept success\n";
+    auto connection = make_unique<Connection>(connect_fd);
 
-    // TODO: accept workers
-    cout << "----new admin--- id: " << next_admin_id_ << endl;
-    Server& srv = *this;
-    admins_[next_admin_id_] = make_unique<Admin>(connect_fd, srv);
-    ++next_admin_id_;
+    try {
+      string handshake = connection->RecvMsg();
+      if (handshake == "ADMIN") {
+        cout << "----new admin--- id: " << next_admin_id_ << endl;
+        Server& server = *this;
+        admins_[next_admin_id_] = make_unique<Admin>(move(connection), server);
+        ++next_admin_id_;
+      } else if (handshake == "WORKER") {
+        cout << "----new worker--- id: " << next_worker_id_ << endl;
+        Server& server = *this;
+        workers_[next_worker_id_] = make_unique<Worker>(move(connection), server);
+        ++next_worker_id_;
+      } else {
+        cout << "----unknown client--- handshake: " << handshake << endl;
+        if (shutdown(socket_fd, SHUT_RDWR) == -1)
+          perror("shutdown failed");
+        if (close(socket_fd) == -1)
+          perror("close failed");
+      }
+    } catch (ConnectionException ce) {
+      cerr << "Exception occured before greeting:" << endl;
+      cerr << ce.what() << endl;
+    }
   }
 
   if(close(socket_fd) < 0)
@@ -129,12 +148,40 @@ void Server::GetArguments(int argc, char** argv) {
   }
 }
 
-vector<ProcessImage> Server::GetProcessImages() {
-    std::lock_guard<std::mutex> lock(process_images_mutex_);
-    return vector<ProcessImage>(process_images_);
+vector<ProcessImage> Server::GetProcessImages()const {
+  lock_guard<mutex> lock(process_images_mutex_);
+  return vector<ProcessImage>(process_images_);
 }
 
 void Server::AddProcessImage(ProcessImage pi) {
-    std::lock_guard<std::mutex> lock(process_images_mutex_);
-    process_images_.push_back(pi);
+  lock_guard<mutex> lock(process_images_mutex_);
+  process_images_.push_back(pi);
+}
+
+vector<int> Server::GetAdminIDs()const {
+  lock_guard<mutex> lock(admins_mutex_);
+
+  vector<int> v;
+
+  for(auto& a : admins_)
+    v.push_back(a.first);
+  return v;
+}
+vector<int> Server::GetWorkerIDs()const {
+  lock_guard<mutex> lock(workers_mutex_);
+
+  vector<int> v;
+  for(auto& a : workers_)
+    v.push_back(a.first);
+  return v;
+}
+
+shared_ptr<Admin> Server::GetAdmin(int i)const {
+  lock_guard<mutex> lock(admins_mutex_);
+  return admins_.at(i);
+}
+
+shared_ptr<Worker> Server::GetWorker(int i)const {
+  lock_guard<mutex> lock(workers_mutex_);
+  return workers_.at(i);
 }

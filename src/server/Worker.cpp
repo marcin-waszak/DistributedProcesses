@@ -7,11 +7,11 @@ using std::cerr;
 using std::cout;
 using std::endl;
 
-Worker::Worker(int connect_id, Server& srv)
-        : connection_(connect_id),
-        server_(srv),
+Worker::Worker(unique_ptr<Connection> connection, Server& server)
+        : connection_(std::move(connection)),
+        server_(server),
         closed_(false) {
-    thread_ = make_unique<thread>(thread(&Worker::Loop, this));
+    thread_ = make_unique<thread>(&Worker::Loop, this);
 }
 
 Worker::~Worker() {
@@ -24,13 +24,19 @@ Worker::~Worker() {
 
 void Worker::Loop() {
     while (true) {
-        string msg = connection_.RecvMsg();
-        if (msg == "LIST_IMAGES_RESPONSE") {
-            result_ = connection_.RecvMsg();
-            response_.unlock();
-        } else if (msg == "WORKER_ERROR") {
-            std::cout << "Worker raised error" << endl;
-            // TODO
+        try {
+            string msg = connection_->RecvMsg();
+            if (msg == "LIST_IMAGES_RESPONSE") {
+                result_ = connection_->RecvMsg();
+                response_.unlock();
+            } else if (msg == "WORKER_ERROR") {
+                std::cout << "Worker raised error" << endl;
+                // TODO
+            }
+        } catch (ConnectionException) {
+            cerr << "Worker disconnected" << endl;
+            closed_ = true;
+            break;
         }
     }
 }
@@ -38,6 +44,11 @@ void Worker::Loop() {
 string Worker::ListImages() {
     std::lock_guard<std::mutex> lock(access_);
     string res = "error";
+    try {
+      connection_->SendMsg("LIST_IMAGES");
+    } catch (ConnectionException) {
+      closed_ = true;
+    }
     if (closed_)
         return res;
     response_.lock();
@@ -47,4 +58,8 @@ string Worker::ListImages() {
 
 bool Worker::Closed() {
     return closed_;
+}
+
+string Worker::GetAddress()const {
+    return connection_->GetAddress();
 }

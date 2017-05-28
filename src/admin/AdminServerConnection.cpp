@@ -1,19 +1,22 @@
 #include "AdminServerConnection.h"
 
-AdminServerConnection::AdminServerConnection(const string& serverAddr, int port)
-    : Connection(serverAddr,port) {
-    // TODO: implement properly
+AdminServerConnection::AdminServerConnection(const string& address, int port)
+    : Connection(address, port) {
+    SendMsg("ADMIN");
 }
 
-vector<shared_ptr<Worker>> AdminServerConnection::GetWorkers() {
-    // TODO: implement properly
+string AdminServerConnection::GetWorkers() {
     SendMsg("GET_WORKERS");
-    string r = RecvMsg();
-    return vector<shared_ptr<Worker>>(std::stoi(r), nullptr);
+    return RecvMsg();
 }
 
 string AdminServerConnection::GetProcessImagesList() {
-    // TODO: error handling
     SendMsg("GET_IMAGES_LIST");
     return RecvMsg();
+}
+
+bool AdminServerConnection::Close() {
+    SendMsg("CLOSE");
+    Connection::Close();
+    return true;
 }

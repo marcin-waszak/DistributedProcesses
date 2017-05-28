@@ -106,19 +106,41 @@ void Connection::Recv(void* data, size_t size) {
 }
 
 Connection::Connection(int fd)
-    : socked_fd_(fd), valid_(true) {
+    : socked_fd_(fd), address_(""), port_(-1), valid_(true) {
 
+    struct sockaddr_storage addr;
+    socklen_t addr_size = sizeof(addr);
+    char clientip[INET6_ADDRSTRLEN];
+    int res = getpeername(socked_fd_, (struct sockaddr *)&addr, &addr_size);
+    if (res == -1) {
+        perror("error during getpeername");
+        valid_ = false;
+    } else {
+        if (addr.ss_family == AF_INET) {
+            struct sockaddr_in *s = (struct sockaddr_in *)&addr;
+            port_ = ntohs(s->sin_port);
+            inet_ntop(AF_INET, &s->sin_addr, clientip, sizeof clientip);
+        } else { // AF_INET6
+            struct sockaddr_in6 *s = (struct sockaddr_in6 *)&addr;
+            port_ = ntohs(s->sin6_port);
+            inet_ntop(AF_INET6, &s->sin6_addr, clientip, sizeof clientip);
+        }
+        address_ = clientip;
+    }
 }
 
 bool Connection::Connect() {
-    auto soc = CreateSocket(addr_, port_);
+    if (port_ == -1)
+        throw ConnectionException("Cannot reconnect, port is unknown.");
+
+    auto soc = CreateSocket(address_, port_);
     socked_fd_ = soc.first;
     if (socked_fd_ == -1) {
         valid_ = false;
         return false;
     }
     sockaddr_union sa = soc.second;
-    std::cout << "Connecting to: " << addr_ << std::endl;
+    std::cout << "Connecting to: " << address_ << std::endl;
     if (connect(socked_fd_, (struct sockaddr *)&sa, sizeof sa) == -1) {
         perror("connect failed");
         exit(1); // TODO: is exit apropriate here?
@@ -145,7 +167,7 @@ bool Connection::Valid()const {
 }
 
 Connection::Connection(const string& addr, int port)
-        :addr_(addr), port_(port), valid_(false) {
+        :address_(addr), port_(port), valid_(false) {
     Connect();
 }
 

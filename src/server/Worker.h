@@ -12,7 +12,7 @@ using std::make_unique;
 class Server;
 
 class Worker {
-    Connection connection_;
+    unique_ptr<Connection> connection_;
     Server& server_;
     unique_ptr<thread> thread_;
     bool closed_;
@@ -22,11 +22,12 @@ class Worker {
 
     void Loop();
 public:
-    explicit Worker(int connect_id, Server&);
+    explicit Worker(unique_ptr<Connection>, Server&);
     ~Worker();
 
     // query methods
     string ListImages();
+    string GetAddress()const;
 
     bool Closed();
 };

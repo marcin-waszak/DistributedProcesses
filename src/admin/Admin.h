@@ -9,6 +9,7 @@
 #include <iostream>
 #include <memory>
 #include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/tokenizer.hpp>
 
 #include "AdminServerConnection.h"
