@@ -60,9 +60,48 @@ def test1():
     lines2 = [l.strip() for l in expectedOut.strip().split('\n') if l.strip()!='']
     return lines1 == lines2
 
+def test2():
+    inst = []
+    inst.append(runServer('-a', 'localhost'))
+    inst.append(runWorker('-a', 'localhost'))
+
+    p = Popen([adminExecutable, '-a', 'localhost', '-g', '-d'],stdout=PIPE)
+    out = p.communicate()
+    out = out[0].decode()
+
+    expectedOut='''
+    <empty>
+'''
+    for i in inst:
+        i.kill()
+
+    lines1 = [l.strip() for l in out.strip().split('\n')         if l.strip()!='']
+    lines2 = [l.strip() for l in expectedOut.strip().split('\n') if l.strip()!='']
+    return lines1 == lines2
+
+def test3():
+    inst = []
+    inst.append(runServer('-a', 'localhost'))
+    inst.append(runWorker('-a', 'localhost'))
+    Popen([adminExecutable, '-a', 'localhost', '-u', 'bin/worker'],stdout=PIPE)
+
+    p = Popen([adminExecutable, '-a', 'localhost', '-g', '-d'],stdout=PIPE)
+    out = p.communicate()
+    out = out[0].decode()
+
+    expectedOut='''
+    "_server_images/worker"
+'''
+    for i in inst:
+        i.kill()
+
+    lines1 = [l.strip() for l in out.strip().split('\n')         if l.strip()!='']
+    lines2 = [l.strip() for l in expectedOut.strip().split('\n') if l.strip()!='']
+    return lines1 == lines2
+
 if __name__ == "__main__":
     print("running tests")
-    tests = [test0, test1]
+    tests = [test0, test1, test2, test3]
     for i,t in enumerate(tests):
         if not t():
             print ('%s Test %d failed %s' % (fg('red'), i, attr('reset')))
