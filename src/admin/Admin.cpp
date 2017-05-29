@@ -64,13 +64,14 @@ bool Admin::IsInteractive() {
 
 void Admin::BatchMode() {
   // TODO: get rid of copy-paste code
-  if (vm_.count("list-workers"))
+  if (vm_.count("list-workers")) {
     Log::Info("Workers list:");
     Log::Out(connection_->GetWorkers().c_str());
-
-  if (vm_.count("list-images"))
+  }
+  if (vm_.count("list-images")) {
     Log::Info("Images on server:");
     Log::Out(connection_->GetProcessImagesList().c_str());
+  }
   if (vm_.count("upload-image")) {
     string image_path = vm_["upload-image"].as<string>();
     connection_->UploadImage(image_path);
