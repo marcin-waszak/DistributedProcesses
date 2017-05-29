@@ -20,10 +20,9 @@ def test1():
     inst.append(runWorker())
     inst.append(runWorker())
 
-    p = Popen([adminExecutable, 'localhost', '-l', '-d'],stdout=PIPE,bufsize=1)
+    p = Popen([adminExecutable, 'localhost', '-l', '-d'],stdout=PIPE)
     out = p.communicate()
     out = out[0].decode()
-    # print(out)
 
     expectedOut='''
 0 -> ::1
@@ -36,8 +35,6 @@ def test1():
 
     lines1 = [l.strip() for l in out.strip().split('\n')         if l.strip()!='']
     lines2 = [l.strip() for l in expectedOut.strip().split('\n') if l.strip()!='']
-    # print(lines1)
-    # print(lines2)
     return lines1 == lines2
 
 if __name__ == "__main__":
