@@ -34,6 +34,9 @@ void Worker::Loop() {
             } else if (msg == "UPLOAD_IMAGE_RESPONSE") {
                 result_ = connection_->RecvMsg();
                 response_.unlock();
+            } else if (msg == "DELETE_IMAGE_RESPONSE") {
+                result_ = connection_->RecvMsg();
+                response_.unlock();
             } else if (msg == "WORKER_ERROR") {
                 std::cout << "Worker raised error" << endl;
                 // TODO
@@ -86,7 +89,6 @@ string Worker::DeleteImage(ProcessImage p) {
     try {
         connection_->SendMsg("DELETE_IMAGE");
         connection_->SendMsg(p.GetPath().filename().string());
-        connection_->SendProcessImage(p);
     } catch (ConnectionException) {
         closed_ = true;
     }

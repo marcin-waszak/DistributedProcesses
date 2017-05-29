@@ -54,6 +54,11 @@ void Worker::ExecCmd(const string& msg) {
         string name = server_connection_.RecvMsg();
         fs::path filePath = images_path_ / name;
         remove(filePath);
+        for (size_t i = 0; i < process_images_.size(); i++) {
+            if (process_images_[i].GetPath() == filePath) {
+                process_images_.erase(process_images_.begin() + i);
+            }
+        }
         std::cout << "Image removed: " << filePath << std::endl;
         server_connection_.SendMsg("DELETE_IMAGE_RESPONSE");
         server_connection_.SendMsg("OK");

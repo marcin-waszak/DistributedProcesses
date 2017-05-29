@@ -166,11 +166,6 @@ void Server::RemoveProcessImage(fs::path processPath) {
       process_images_.erase(process_images_.begin() + i);
     }
   }
-  for (auto it = process_images_.begin(); it != process_images_.end(); it++) {
-    if (it->GetPath() == processPath) {
-
-    }
-  }
 }
 vector<int> Server::GetAdminIDs()const {
   lock_guard<mutex> lock(admins_mutex_);
