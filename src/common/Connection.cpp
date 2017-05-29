@@ -19,8 +19,8 @@
 static int Resolve(const string &address, addrinfo** info) {
     int result = getaddrinfo(address.c_str(), NULL, NULL, info);
     if (result) {
-        std::cerr << "Invalid address" << std::endl
-            << gai_strerror(result) << std::endl;
+        Log::Error("Invalid address");
+        Log::Error("%s",gai_strerror(result));
         return -1;
     }
     return 0;
@@ -29,23 +29,23 @@ static int Resolve(const string &address, addrinfo** info) {
 std::pair<int, sockaddr_union> Connection::CreateSocket(const string& addr, int port) {
     addrinfo* info = NULL;
     if(Resolve(addr, &info) < 0) {
-        perror("Cannot resolve()");
+        Log::PutError("Cannot resolve()");
         return std::make_pair(-1, sockaddr_union());
     }
 
-    std::cout << "Resolve success" << std::endl;
+    Log::Info("Resolve success");
 
     int address_format = info->ai_family;
     int packet_format = address_format == AF_INET6 ? PF_INET6 : PF_INET;
     int socket_fd = socket(packet_format, SOCK_STREAM, 0);
     if (socket_fd < 0) {
-        perror("socket()");
+        Log::PutError("socket()");
         return std::make_pair(-1, sockaddr_union());
     }
 
     int enable = 1;
     if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
-        perror("setsockopt(SO_REUSEADDR) failed");
+        Log::PutError("setsockopt(SO_REUSEADDR) failed");
 
     sockaddr_union sa;
     memset(&sa, 0, sizeof(sa));
@@ -54,7 +54,7 @@ std::pair<int, sockaddr_union> Connection::CreateSocket(const string& addr, int 
 
     switch(address_format) {
         case AF_INET:
-            std::cout << "Using AF_INET\n";
+        Log::Info("Using AF_INET");
             addr_info = (sockaddr_in*)info->ai_addr;
             sa.sin.sin_family = AF_INET;
             sa.sin.sin_port = htons(port);
@@ -62,7 +62,7 @@ std::pair<int, sockaddr_union> Connection::CreateSocket(const string& addr, int 
             break;
 
         case AF_INET6:
-            std::cout << "Using AF_INET6\n";
+            Log::Info("Using AF_INET6");
             addr_info6 = (sockaddr_in6*)info->ai_addr;
             sa.sin6.sin6_family = AF_INET6;
             sa.sin6.sin6_port = htons(port);
@@ -113,7 +113,7 @@ Connection::Connection(int fd)
     char clientip[INET6_ADDRSTRLEN];
     int res = getpeername(socked_fd_, (struct sockaddr *)&addr, &addr_size);
     if (res == -1) {
-        perror("error during getpeername");
+        Log::PutError("error during getpeername");
         valid_ = false;
     } else {
         if (addr.ss_family == AF_INET) {
@@ -140,12 +140,12 @@ bool Connection::Connect() {
         return false;
     }
     sockaddr_union sa = soc.second;
-    std::cout << "Connecting to: " << address_ << std::endl;
+    Log::Info("Connecting to: %s",address_.c_str());
     if (connect(socked_fd_, (struct sockaddr *)&sa, sizeof sa) == -1) {
-        perror("connect failed");
+        Log::PutError("connect failed");
         exit(1); // TODO: is exit apropriate here?
         if(close(socked_fd_) == -1)
-            perror("close failed");
+            Log::PutError("close failed");
         valid_ = false;
         return false;
     }
@@ -155,7 +155,7 @@ bool Connection::Connect() {
 
 bool Connection::Close() {
   if(close(socked_fd_) == -1) {
-    perror("close failed");
+      Log::PutError("close failed");
     return false;
   }
 
@@ -173,9 +173,9 @@ Connection::Connection(const string& addr, int port)
 
 Connection::~Connection() {
     if (shutdown(socked_fd_, SHUT_RDWR) == -1)
-        perror("shutdown failed");
+        Log::PutError("shutdown failed");
     if(close(socked_fd_) == -1)
-        perror("close failed");
+        Log::PutError("close failed");
 }
 
 string Connection::RecvMsg() {

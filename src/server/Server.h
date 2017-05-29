@@ -40,6 +40,17 @@ using std::vector;
 using std::mutex;
 using std::lock_guard;
 
+class ServerExeption : public std::runtime_error {
+public:
+    ServerExeption(std::string s)
+        :runtime_error(BuildErrorMessage(s)) {
+    }
+
+    string BuildErrorMessage(std::string s) {
+        return "ServerExeption: " + s;
+    }
+};
+
 class Server {
 public:
   Server();

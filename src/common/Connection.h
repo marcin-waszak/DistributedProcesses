@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ProcessImage.h"
-
+#include "Log.h"
 #include <string>
 #include <sstream>
 #include <netinet/in.h>

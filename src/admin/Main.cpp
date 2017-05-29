@@ -6,6 +6,8 @@ using std::cout;
 using std::endl;
 using std::string;
 
+bool Log::Enable = true;
+
 int main(int argc, char* argv[]) {
     Admin admin;
 
