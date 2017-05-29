@@ -80,6 +80,23 @@ string Worker::UploadImage(ProcessImage p) {
     return res;
 }
 
+string Worker::DeleteImage(ProcessImage p) {
+    std::lock_guard<std::mutex> lock(access_);
+    string res = "error";
+    try {
+        connection_->SendMsg("DELETE_IMAGE");
+        connection_->SendMsg(p.GetPath().filename().string());
+        connection_->SendProcessImage(p);
+    } catch (ConnectionException) {
+        closed_ = true;
+    }
+    if (closed_)
+        return res;
+    response_.lock();
+    res = result_;
+    return res;
+}
+
 bool Worker::Closed() {
     return closed_;
 }

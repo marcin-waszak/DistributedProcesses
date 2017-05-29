@@ -78,6 +78,11 @@ bool Admin::ExecCmd() {
             server_.AddProcessImage(pi);
         // TODO: file save errors
         connection_->SendMsg("OK");
+    } else if (msg == "DELETE_IMAGE") {
+        string name = connection_->RecvMsg();
+        fs::path filePath = server_.GetImagesPath() / name;
+        remove(filePath);
+        connection_->SendMsg("OK");
     } else if (msg == "GET_WORKERS_IMAGES") {
         auto wids = server_.GetWorkerIDs();
         ostringstream ss("");
@@ -102,7 +107,7 @@ bool Admin::ExecCmd() {
             int worker_id = boost::lexical_cast<int>(worker_id_str);
             auto worker = server_.GetWorker(worker_id);
             bool found = false;
-            for (auto& p : server_.GetProcessImages()) {
+            for (auto &p : server_.GetProcessImages()) {
                 if (p.GetPath().filename() == name) {
                     string resp = worker->UploadImage(p);
                     connection_->SendMsg(resp);
@@ -117,7 +122,28 @@ bool Admin::ExecCmd() {
         } catch (boost::bad_lexical_cast) {
             connection_->SendMsg("Wrong worker id.");
         }
-
+    } else if (msg == "DELETE_IMAGE_WORKER") {
+        string name = connection_->RecvMsg();
+        string worker_id_str = connection_->RecvMsg();
+        try {
+            int worker_id = boost::lexical_cast<int>(worker_id_str);
+            auto worker = server_.GetWorker(worker_id);
+            bool found = false;
+            for (auto &p : server_.GetProcessImages()) {
+                if (p.GetPath().filename() == name) {
+                    string resp = worker->DeleteImage(p);
+                    connection_->SendMsg(resp);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+                connection_->SendMsg("Such image does not exist on server");
+        } catch (ServerExeption) {
+            connection_->SendMsg("Such worker does not exist.");
+        } catch (boost::bad_lexical_cast) {
+            connection_->SendMsg("Wrong worker id.");
+        }
     } else if (msg == "CLOSE") {
         closed_ = true;
         return false;
