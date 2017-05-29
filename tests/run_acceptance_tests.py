@@ -1,4 +1,4 @@
-from subprocess import Popen, PIPE, call
+from subprocess import Popen, PIPE, call, DEVNULL
 import os
 
 adminExecutable = './bin/admin'
@@ -6,12 +6,10 @@ serverExecutable = './bin/server'
 workerExecutable = './bin/worker'
 
 def runServer(*args):
-    with open(os.devnull, "w") as f:
-        return Popen([serverExecutable,*args], stdout=f, stderr=f)
+    return Popen([serverExecutable,*args], stdout=DEVNULL, stderr=DEVNULL)
 
 def runWorker(*args):
-    with open(os.devnull, "w") as f:
-        return Popen([workerExecutable,*args], stdout=f, stderr=f)
+    return Popen([workerExecutable,*args], stdout=DEVNULL, stderr=DEVNULL)
 
 def test1():
     inst = []
