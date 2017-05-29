@@ -1,5 +1,6 @@
 from subprocess import Popen, PIPE, call, DEVNULL
 from colored import fg, bg, attr
+from time import sleep
 import os
 
 adminExecutable = './bin/admin'
@@ -14,12 +15,13 @@ def runWorker(*args):
 
 def test0():
     inst = []
-    inst.append(runServer('-a', 'localhost'))
-    inst.append(runWorker('-a', 'localhost'))
-    inst.append(runWorker('-a', 'localhost'))
-    inst.append(runWorker('-a', 'localhost'))
+    inst.append(runServer('-a', '127.0.0.1'))
+    inst.append(runWorker('-a', '127.0.0.1'))
+    inst.append(runWorker('-a', '127.0.0.1'))
+    inst.append(runWorker('-a', '127.0.0.1'))
 
-    p = Popen([adminExecutable, '-a', 'localhost', '-l', '-d'],stdout=PIPE)
+    sleep(4)
+    p = Popen([adminExecutable, '-a', '127.0.0.1', '-l', '-d'],stdout=PIPE)
     out = p.communicate()
     out = out[0].decode()
 
@@ -43,6 +45,7 @@ def test1():
     inst.append(runWorker('-a', '::1'))
     inst.append(runWorker('-a', '::1'))
 
+    sleep(4)
     p = Popen([adminExecutable, '-a', '::1', '-l', '-d'],stdout=PIPE)
     out = p.communicate()
     out = out[0].decode()
@@ -102,8 +105,10 @@ def test3():
 if __name__ == "__main__":
     print("running tests")
     tests = [test0, test1, test2, test3]
-    for i,t in enumerate(tests):
-        if not t():
-            print ('%s Test %d failed %s' % (fg('red'), i, attr('reset')))
-        else:
-            print ('%s Test %d passed %s' % (fg('green'), i, attr('reset')))
+    for n in range(100):
+        for i,t in enumerate(tests):
+            if not t():
+                print ('%s Test %d failed %s' % (fg('red'), i, attr('reset')))
+            else:
+                print ('%s Test %d passed %s' % (fg('green'), i, attr('reset')))
+            sleep(0.1)
