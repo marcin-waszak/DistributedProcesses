@@ -1,13 +1,54 @@
 #include "AdminServerConnection.h"
 
+#include <iostream>
+#include <boost/algorithm/string.hpp>
 
-AdminServerConnection::AdminServerConnection(const string& serverAddr, int port) : Connection(serverAddr,port) {
-    // TODO: implement properly
+
+AdminServerConnection::AdminServerConnection(const string& address, int port)
+    : Connection(address, port) {
+    SendMsg("ADMIN");
 }
 
-vector<shared_ptr<Worker>> AdminServerConnection::GetWorkers() {
-    // TODO: implement properly
+string AdminServerConnection::GetWorkers() {
     SendMsg("GET_WORKERS");
-    string r = RecvMsg();
-    return vector<shared_ptr<Worker>>(std::stoi(r), nullptr);
+    return RecvMsg();
+}
+
+string AdminServerConnection::GetProcessImagesList() {
+    SendMsg("GET_IMAGES_LIST");
+    return RecvMsg();
+}
+
+string AdminServerConnection::UploadImage(string imagePath) {
+    boost::trim(imagePath);
+    if (imagePath.empty() || !boost::filesystem::exists(imagePath)) {
+        std::cout << "File does not exist: " << imagePath << std::endl;
+        return "File does not exist";
+    }
+    SendMsg("UPLOAD_IMAGE");
+    string imageName = boost::filesystem::path(imagePath).filename().string();
+    SendMsg(imageName);
+    ProcessImage pi(imagePath);
+    SendProcessImage(pi);
+    return RecvMsg();
+}
+
+string AdminServerConnection::GetWorkersImages() {
+    SendMsg("GET_WORKERS_IMAGES");
+    return RecvMsg();
+}
+
+bool AdminServerConnection::Close() {
+    SendMsg("CLOSE");
+    Connection::Close();
+    return true;
+}
+
+string AdminServerConnection::UploadImageWorker(string imageName, string workerId) {
+    boost::trim(imageName);
+    boost::trim(workerId);
+    SendMsg("UPLOAD_IMAGE_WORKER");
+    SendMsg(imageName);
+    SendMsg(workerId);
+    return RecvMsg();
 }

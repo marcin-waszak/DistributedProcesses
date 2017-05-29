@@ -8,8 +8,16 @@
 using std::vector;
 using std::shared_ptr;
 
-class AdminServerConnection : Connection{
+class AdminServerConnection : public Connection {
 public:
-    AdminServerConnection(const string&, int port);
-    vector<shared_ptr<Worker>> GetWorkers();
+    AdminServerConnection(const string& address, int port);
+
+    // commands
+    string GetWorkers();
+    string GetProcessImagesList();
+    string UploadImage(string path);
+    string GetWorkersImages();
+    string UploadImageWorker(string imageName, string workerId);
+
+    bool Close() override;
 };
