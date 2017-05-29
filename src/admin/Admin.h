@@ -44,6 +44,8 @@ private:
   void UploadImage(const string &imagePath) const;
   void ListWorkersImages() const;
   void UploadImageWorker(const vector<string> &elems) const;
+  void DeleteImage(const vector<string> &elems) const;
+  void DeleteImageWorker(const vector<string> &elems) const;
 };
 
 

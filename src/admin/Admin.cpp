@@ -114,11 +114,17 @@ void Admin::ParseCommand(string command) {
     string image_path = command.substr(command.find(" ") + 1);
     UploadImage(image_path);
   }
+  else if (cmd == "delete_image") {
+    DeleteImage(elems);
+  }
   else if (cmd == "list_workers_images") {
     ListWorkersImages();
   }
   else if (cmd == "upload_image_worker") {
     UploadImageWorker(elems);
+  }
+  else if (cmd == "delete_image_worker") {
+    DeleteImageWorker(elems);
   }
   else {
     Log::Info("Invalid command: %s", command.c_str());
@@ -150,4 +156,20 @@ void Admin::UploadImageWorker(const vector<string> &elems) const {
     return;
   }
   Log::Out(connection_->UploadImageWorker(elems[1], elems[2]).c_str());
+}
+
+void Admin::DeleteImage(const vector<string> &elems) const {
+  if (elems.size() != 2) {
+    Log::Error("Wrong arguments count");
+    return;
+  }
+  Log::Out(connection_->DeleteImage(elems[1]).c_str());
+}
+
+void Admin::DeleteImageWorker(const vector<string> &elems) const {
+  if (elems.size() != 3) {
+    Log::Error("Wrong arguments count");
+    return;
+  }
+  Log::Out(connection_->DeleteImageWorker(elems[1], elems[2]).c_str());
 }

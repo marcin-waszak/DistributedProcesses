@@ -158,6 +158,15 @@ void Server::AddProcessImage(ProcessImage pi) {
   process_images_.push_back(pi);
 }
 
+void Server::RemoveProcessImage(fs::path processPath) {
+  lock_guard<mutex> lock(process_images_mutex_);
+
+  for (size_t i = 0; i < process_images_.size(); i++) {
+    if (process_images_[i].GetPath() == processPath) {
+      process_images_.erase(process_images_.begin() + i);
+    }
+  }
+}
 vector<int> Server::GetAdminIDs()const {
   lock_guard<mutex> lock(admins_mutex_);
 
@@ -167,6 +176,7 @@ vector<int> Server::GetAdminIDs()const {
     v.push_back(a.first);
   return v;
 }
+
 vector<int> Server::GetWorkerIDs()const {
   lock_guard<mutex> lock(workers_mutex_);
 
