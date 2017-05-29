@@ -66,7 +66,7 @@ bool Worker::WorkerLoop() {
             if (server_connection_.Connect()) {
                 std::cout<< "Connection established." << std::endl;
             } else {
-                std::this_thread::sleep_for(std::chrono::seconds(5));
+                std::this_thread::sleep_for(std::chrono::seconds(3));
             }
         }
     }
