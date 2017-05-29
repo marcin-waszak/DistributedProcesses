@@ -35,7 +35,7 @@ string AdminServerConnection::UploadImage(string imagePath) {
 
 string AdminServerConnection::DeleteImage(string imageName) {
     boost::trim(imageName);
-    SendMsg("DELETE_IMAGE_WORKER");
+    SendMsg("DELETE_IMAGE");
     SendMsg(imageName);
     return RecvMsg();
 }

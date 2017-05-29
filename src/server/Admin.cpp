@@ -82,6 +82,7 @@ bool Admin::ExecCmd() {
         string name = connection_->RecvMsg();
         fs::path filePath = server_.GetImagesPath() / name;
         remove(filePath);
+        server_.RemoveProcessImage(filePath);
         connection_->SendMsg("OK");
     } else if (msg == "GET_WORKERS_IMAGES") {
         auto wids = server_.GetWorkerIDs();
