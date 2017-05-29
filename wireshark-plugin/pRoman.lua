@@ -43,8 +43,22 @@ function proman_proto.dissector(buffer, pinfo, tree)
 
 		elseif arg == 'UPLOAD_IMAGE' then
 			subtree:add(buffer(offset, arg:len()), "Command: 'UPLOAD_IMAGE'")
-			line, offset = add_sub_arg(line, offset, "Name: ")
+			line, offset = add_sub_arg(line, offset, "Image Name: ")
+
+		elseif arg == 'DELETE_IMAGE' then
+			subtree:add(buffer(offset, arg:len()), "Command: 'DELETE_IMAGE'")
+			line, offset = add_sub_arg(line, offset, "Image Name: ")
+
+		elseif arg == 'UPLOAD_IMAGE_WORKER' then
+			subtree:add(buffer(offset, arg:len()), "Command: 'UPLOAD_IMAGE_WORKER'")
+			line, offset = add_sub_arg(line, offset, "Image Name: ")
+			line, offset = add_sub_arg(line, offset, "Worker ID: ")
 		
+		elseif arg == 'DELETE_IMAGE_WORKER' then
+			subtree:add(buffer(offset, arg:len()), "Command: 'DELETE_IMAGE_WORKER'")
+			line, offset = add_sub_arg(line, offset, "Image Name: ")
+			line, offset = add_sub_arg(line, offset, "Worker ID: ")
+
 		else
 			return
 		end
@@ -52,4 +66,4 @@ function proman_proto.dissector(buffer, pinfo, tree)
 end
 
 tcp_table = DissectorTable.get("tcp.port")
-tcp_table:add(7777, proman_proto)
+tcp_table:add(1100, proman_proto)
