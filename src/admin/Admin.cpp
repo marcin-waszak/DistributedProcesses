@@ -27,14 +27,13 @@ void Admin::GetArguments(int argc, char **argv) {
     po::notify(vm_);
 
     if (vm_.count("help")) {
-      Log::Info("%s", desc);
+      cout << desc << endl;
       exit(0);
     }
 
     if (!vm_.count("server-addr")) {
       Log::Error("Server address is not given.");
       cout << desc << endl;
-//      Log::Info("%s", desc);
       exit(1);
     }
 
@@ -45,7 +44,7 @@ void Admin::GetArguments(int argc, char **argv) {
   }
   catch(po::error& e) {
     Log::Error("ERROR: %s",e.what());
-    Log::Info("%s", desc);
+    cout << desc << endl;
     exit(1);
   }
 }
@@ -131,6 +130,6 @@ void Admin::parseCommand(string command) {
       Log::Out(connection_->UploadImageWorker(elems[1], elems[2]).c_str());
   }
   else {
-    Log::Info("Invalid command: %s",command);
+    Log::Info("Invalid command: %s", command.c_str());
   }
 }
