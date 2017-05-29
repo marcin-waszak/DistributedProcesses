@@ -126,13 +126,13 @@ void Admin::ParseCommand(string command) {
 }
 
 void Admin::ListWorkers() const {
-  cout << "Workers list:\n"
-       << connection_->GetWorkers();
+  Log::Info("Workers list:");
+  Log::Out(connection_->GetWorkers().c_str());
 }
 
 void Admin::ListImages() const {
-  cout << "Images on server:\n"
-       << connection_->GetProcessImagesList() << endl;
+  Log::Info("Images on server:");
+  Log::Out(connection_->GetProcessImagesList().c_str());
 }
 
 void Admin::UploadImage(const string &imagePath) const {
