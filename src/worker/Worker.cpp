@@ -50,6 +50,13 @@ void Worker::ExecCmd(const string& msg) {
         server_connection_.SendMsg("UPLOAD_IMAGE_RESPONSE");
         // TODO: error
         server_connection_.SendMsg("OK");
+    } else if (msg == "DELETE_IMAGE") {
+        string name = server_connection_.RecvMsg();
+        fs::path filePath = images_path_ / name;
+        remove(filePath);
+        std::cout << "Image removed: " << filePath << std::endl;
+        server_connection_.SendMsg("DELETE_IMAGE_RESPONSE");
+        server_connection_.SendMsg("OK");
     } else {
         std::cout<< "unknown command, ignoring" << std::endl;
     }
