@@ -7,7 +7,6 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-
 void Admin::GetArguments(int argc, char **argv) {
   po::options_description desc("Allowed options");
   desc.add_options()
@@ -33,8 +32,9 @@ void Admin::GetArguments(int argc, char **argv) {
     }
 
     if (!vm_.count("server-addr")) {
-      Log::Error("Server address is not given.") ;
-      Log::Info("%s", desc);
+      Log::Error("Server address is not given.");
+      cout << desc << endl;
+//      Log::Info("%s", desc);
       exit(1);
     }
 
@@ -67,11 +67,11 @@ void Admin::BatchMode() {
   // TODO: get rid of copy-paste code
   if (vm_.count("list-workers"))
     Log::Info("Workers list:");
-    Log::Out(connection_->GetWorkers());
+    Log::Out(connection_->GetWorkers().c_str());
 
   if (vm_.count("list-images"))
     Log::Info("Images on server:");
-    Log::Out(connection_->GetProcessImagesList());
+    Log::Out(connection_->GetProcessImagesList().c_str());
   if (vm_.count("upload-image")) {
     string image_path = vm_["upload-image"].as<string>();
     connection_->UploadImage(image_path);
@@ -110,25 +110,25 @@ void Admin::parseCommand(string command) {
   boost::trim(cmd);
   if (cmd == "list_workers") {
     Log::Info("Workers list: ");
-    Log::Out(connection_->GetWorkers());
+    Log::Out(connection_->GetWorkers().c_str());
   }
   else if (cmd == "list_images") {
     Log::Info("Images on server:");
-    Log::Out(connection_->GetProcessImagesList());
+    Log::Out(connection_->GetProcessImagesList().c_str());
   }
   else if (cmd == "upload_image") {
     string image_path = command.substr(command.find(" ") + 1);
-    Log::Out(connection_->UploadImage(image_path));
+    Log::Out(connection_->UploadImage(image_path).c_str());
   }
   else if (cmd == "list_workers_images") {
     Log::Info( "Workers images list:");
-    Log::Out(connection_->GetWorkersImages());
+    Log::Out(connection_->GetWorkersImages().c_str());
   }
   else if (cmd == "upload_image_worker") {
     if (elems.size() != 3)
       Log::Error("Wrong arguments count");
     else
-      Log::Out(connection_->UploadImageWorker(elems[1], elems[2]));
+      Log::Out(connection_->UploadImageWorker(elems[1], elems[2]).c_str());
   }
   else {
     Log::Info("Invalid command: %s",command);

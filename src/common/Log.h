@@ -7,40 +7,52 @@
 
 #include <utility>
 #include <cstdio>
+#include <cstdarg>
 
 class Log {
 public:
-  template <typename ...Args>
-  static void Out(Args&&... args) {
-    char buffer_[256];
-    snprintf(buffer_, sizeof(buffer_), std::forward<Args>(args)...);
-    fprintf(stdout, "%s\n", buffer_);
+  static void Out(const char* fmt, ...)
+  {
+    char buffer[256];
+    va_list args;
+    va_start(args, fmt);
+    vsprintf(buffer, fmt, args);
+    va_end(args);
+
+    fprintf(stdout, "%s\n", buffer);
     fflush(stdout);
   }
 
-  template <typename ...Args>
-  static void Info(Args&&... args) {
-    if (Enable) {
-      char buffer_[256];
-      snprintf(buffer_, sizeof(buffer_), std::forward<Args>(args)...);
-      fprintf(stdout, "%s\n", buffer_);
+  static void Info(const char* fmt, ...)
+  {
+    if(Enable) {
+      char buffer[256];
+      va_list args;
+      va_start(args, fmt);
+      vsprintf(buffer, fmt, args);
+      va_end(args);
+
+      fprintf(stdout, "%s\n", buffer);
       fflush(stdout);
     }
   }
 
-  template <typename ...Args>
-  static void Error(Args&&... args) {
-    if (Enable) {
-      char buffer_[256];
-      snprintf(buffer_, sizeof(buffer_), std::forward<Args>(args)...);
-      fprintf(stderr, "%s\n", buffer_);
+  static void Error(const char* fmt, ...)
+  {
+    if(Enable) {
+      char buffer[256];
+      va_list args;
+      va_start(args, fmt);
+      vsprintf(buffer, fmt, args);
+      va_end(args);
+
+      fprintf(stderr, "%s\n", buffer);
     }
   }
 
-  template <typename ...Args>
-  static void PutError(Args&&... args) {
+  static void PutError(const char* x) {
     if (Enable)
-      perror(std::forward<Args>(args)...);
+      perror(x);
   }
 
   static bool Enable;
