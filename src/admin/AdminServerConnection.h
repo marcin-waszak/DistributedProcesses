@@ -16,8 +16,10 @@ public:
     string GetWorkers();
     string GetProcessImagesList();
     string UploadImage(string path);
+    string DeleteImage(string imageName);
     string GetWorkersImages();
     string UploadImageWorker(string imageName, string workerId);
+    string DeleteImageWorker(string imageName, string workerId);
 
     bool Close() override;
 };
