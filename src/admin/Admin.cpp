@@ -63,17 +63,15 @@ bool Admin::IsInteractive() {
 }
 
 void Admin::BatchMode() {
-  // TODO: get rid of copy-paste code
-  if (vm_.count("list-workers"))
-    Log::Info("Workers list:");
-    Log::Out(connection_->GetWorkers().c_str());
-
-  if (vm_.count("list-images"))
-    Log::Info("Images on server:");
-    Log::Out(connection_->GetProcessImagesList().c_str());
+  if (vm_.count("list-workers")) {
+    ListWorkers();
+  }
+  if (vm_.count("list-images")) {
+    ListImages();
+  }
   if (vm_.count("upload-image")) {
     string image_path = vm_["upload-image"].as<string>();
-    connection_->UploadImage(image_path);
+    UploadImage(image_path);
   }
 }
 
@@ -84,7 +82,6 @@ bool Admin::CommandParser() {
   rl_bind_key('\t', rl_complete);
 
   for (;;) {
-    cout << "\n>";
     input = readline(prompt);
     add_history(input);
 
@@ -94,42 +91,63 @@ bool Admin::CommandParser() {
       connection_->Close();
       break;
     }
-
-    parseCommand(input);
+    ParseCommand(input);
   }
-
   return true;
 }
 
-void Admin::parseCommand(string command) {
+void Admin::ParseCommand(string command) {
+
   std::vector<std::string> elems;
   boost::split(elems, command, boost::is_any_of("\t "));
 
   string cmd = elems[0];
   boost::trim(cmd);
+
   if (cmd == "list_workers") {
-    Log::Info("Workers list: ");
-    Log::Out(connection_->GetWorkers().c_str());
+    ListWorkers();
   }
   else if (cmd == "list_images") {
-    Log::Info("Images on server:");
-    Log::Out(connection_->GetProcessImagesList().c_str());
+    ListImages();
   }
   else if (cmd == "upload_image") {
     string image_path = command.substr(command.find(" ") + 1);
-    Log::Out(connection_->UploadImage(image_path).c_str());
+    UploadImage(image_path);
   }
   else if (cmd == "list_workers_images") {
-    Log::Info( "Workers images list:");
-    Log::Out(connection_->GetWorkersImages().c_str());
+    ListWorkersImages();
   }
   else if (cmd == "upload_image_worker") {
-    if (elems.size() != 3)
-      Log::Error("Wrong arguments count");
-    else
-      Log::Out(connection_->UploadImageWorker(elems[1], elems[2]).c_str());
+    UploadImageWorker(elems);
   }
   else {
     Log::Info("Invalid command: %s", command.c_str());
   }
+}
+
+void Admin::ListWorkers() const {
+  cout << "Workers list:\n"
+       << connection_->GetWorkers();
+}
+
+void Admin::ListImages() const {
+  cout << "Images on server:\n"
+       << connection_->GetProcessImagesList() << endl;
+}
+
+void Admin::UploadImage(const string &imagePath) const {
+  connection_->UploadImage(imagePath);
+}
+
+void Admin::ListWorkersImages() const {
+  Log::Info("Workers images list:");
+  Log::Out(connection_->GetWorkersImages().c_str());
+}
+
+void Admin::UploadImageWorker(const vector<string> &elems) const {
+  if (elems.size() != 3) {
+    Log::Error("Wrong arguments count");
+    return;
+  }
+  Log::Out(connection_->UploadImageWorker(elems[1], elems[2]).c_str());
 }
