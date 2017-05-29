@@ -27,6 +27,7 @@ public:
 
     // query methods
     string ListImages();
+    string UploadImage(ProcessImage);
     string GetAddress()const;
 
     bool Closed();

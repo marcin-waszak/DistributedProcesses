@@ -3,6 +3,7 @@
 //
 
 #include "Admin.h"
+#include <boost/algorithm/string.hpp>
 #include <readline/readline.h>
 #include <readline/history.h>
 
@@ -11,6 +12,7 @@ void Admin::GetArguments(int argc, char **argv) {
   desc.add_options()
       ("help,h", "print help message")
       ("interactive,i", "interactive mode")
+      ("debug,d", "debug mode")
       ("server-addr,a", po::value<string>(), "server address (ipv4 or ipv6)")
       ("server-port,p", po::value<int>()->default_value(1100), "server port")
       ("list-workers,l", "list workers")
@@ -30,17 +32,19 @@ void Admin::GetArguments(int argc, char **argv) {
     }
 
     if (!vm_.count("server-addr")) {
-      std::cerr << "Server address not given." << endl;
+      Log::Error("Server address is not given.");
       cout << desc << endl;
       exit(1);
     }
+
+    Log::Enable = !vm_.count("debug");
 
     server_address_ = vm_["server-addr"].as<string>();
     server_port_ = vm_["server-port"].as<int>();
   }
   catch(po::error& e) {
-    cerr << "ERROR: " << e.what() << endl << endl;
-    cerr << desc << endl;
+    Log::Error("ERROR: %s",e.what());
+    cout << desc << endl;
     exit(1);
   }
 }
@@ -49,7 +53,7 @@ void Admin::Connect() {
   connection_ = make_unique<AdminServerConnection>(server_address_, server_port_);
 
   if (!connection_->Valid()) {
-    std::cerr << "Cannot connect to server." << endl;
+    Log::Error("Cannot connect to server.");
     exit(1);
   }
 }
@@ -81,6 +85,8 @@ bool Admin::CommandParser() {
     input = readline(prompt);
     add_history(input);
 
+    Log::Info("%s",input);
+
     if (!input || !strcmp(input, "exit")) {
       connection_->Close();
       break;
@@ -88,6 +94,35 @@ bool Admin::CommandParser() {
     ParseCommand(input);
   }
   return true;
+}
+
+void Admin::ParseCommand(string command) {
+
+  std::vector<std::string> elems;
+  boost::split(elems, command, boost::is_any_of("\t "));
+
+  string cmd = elems[0];
+  boost::trim(cmd);
+
+  if (cmd == "list_workers") {
+    ListWorkers();
+  }
+  else if (cmd == "list_images") {
+    ListImages();
+  }
+  else if (cmd == "upload_image") {
+    string image_path = command.substr(command.find(" ") + 1);
+    UploadImage(image_path);
+  }
+  else if (cmd == "list_workers_images") {
+    ListWorkersImages();
+  }
+  else if (cmd == "upload_image_worker") {
+    UploadImageWorker(elems);
+  }
+  else {
+    Log::Info("Invalid command: %s", command.c_str());
+  }
 }
 
 void Admin::ListWorkers() const {
@@ -104,19 +139,15 @@ void Admin::UploadImage(const string &imagePath) const {
   connection_->UploadImage(imagePath);
 }
 
-void Admin::ParseCommand(string command) {
-  if (command == "list_workers") {
-    ListWorkers();
+void Admin::ListWorkersImages() const {
+  Log::Info("Workers images list:");
+  Log::Out(connection_->GetWorkersImages().c_str());
+}
+
+void Admin::UploadImageWorker(const vector<string> &elems) const {
+  if (elems.size() != 3) {
+    Log::Error("Wrong arguments count");
+    return;
   }
-  else if (command == "list_images") {
-    cout << "Images on server:\n"
-         << connection_->GetProcessImagesList() << endl;
-  }
-  else if (command.find("upload_image") == 0) {
-    string imagePath = command.substr(command.find(" ") + 1);
-    connection_->UploadImage(imagePath);
-  }
-  else {
-    cout << "Invalid command: " << command << endl;
-  }
+  Log::Out(connection_->UploadImageWorker(elems[1], elems[2]).c_str());
 }

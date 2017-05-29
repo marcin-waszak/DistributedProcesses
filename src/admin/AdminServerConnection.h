@@ -15,7 +15,9 @@ public:
     // commands
     string GetWorkers();
     string GetProcessImagesList();
-    void UploadImage(string path);
+    string UploadImage(string path);
+    string GetWorkersImages();
+    string UploadImageWorker(string imageName, string workerId);
 
     bool Close() override;
 };

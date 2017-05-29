@@ -8,7 +8,6 @@
 
 Worker::Worker(const string& addr,int port, fs::path images_path):
     server_connection_(addr,port), images_path_(images_path) {
-    // TODO: say server that you are worker
     if (!fs::exists(images_path_)) {
         std::cout << "Process images directory does not exist, creating empty directory: "
                   << images_path_ << std::endl;
@@ -22,6 +21,7 @@ void Worker::ExecCmd(const string& msg) {
     if (msg == "GET_IMAGES_LIST") {
         if (process_images_.empty()) {
             string resp = "<empty>";
+            server_connection_.SendMsg("GET_IMAGES_LIST_RESPONSE");
             server_connection_.SendMsg(resp);
             std::cout<< "responding:" << resp << std::endl;
         } else {
@@ -30,6 +30,7 @@ void Worker::ExecCmd(const string& msg) {
                 oss << pi.GetPath() << std::endl;
             }
             std::cout<< "responding:\n" << oss.str() << std::endl;
+            server_connection_.SendMsg("GET_IMAGES_LIST_RESPONSE");
             server_connection_.SendMsg(oss.str());
         }
     } else if (msg == "UPLOAD_IMAGE") {
@@ -46,6 +47,9 @@ void Worker::ExecCmd(const string& msg) {
         }
         if (!found)
             process_images_.push_back(pi);
+        server_connection_.SendMsg("UPLOAD_IMAGE_RESPONSE");
+        // TODO: error
+        server_connection_.SendMsg("OK");
     } else {
         std::cout<< "unknown command, ignoring" << std::endl;
     }
