@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+bool Log::Enable = true;
+
 namespace po = boost::program_options;
 using std::cout;
 using std::endl;

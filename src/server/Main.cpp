@@ -1,5 +1,7 @@
 #include "Server.h"
 
+bool Log::Enable = true;
+
 int main(int argc, char** argv) {
     Server server;
 

@@ -27,14 +27,13 @@ void Admin::GetArguments(int argc, char **argv) {
     po::notify(vm_);
 
     if (vm_.count("help")) {
-      Log::Info("%s", desc);
+      cout << desc << endl;
       exit(0);
     }
 
     if (!vm_.count("server-addr")) {
       Log::Error("Server address is not given.");
       cout << desc << endl;
-//      Log::Info("%s", desc);
       exit(1);
     }
 
