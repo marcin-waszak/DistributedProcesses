@@ -70,8 +70,8 @@ void Admin::BatchMode() {
     ListImages();
   }
   if (vm_.count("upload-image")) {
-    string imagePath = vm_["upload-image"].as<string>();
-    UploadImage(imagePath);
+    string image_path = vm_["upload-image"].as<string>();
+    UploadImage(image_path);
   }
 }
 

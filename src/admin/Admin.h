@@ -42,6 +42,8 @@ private:
   void ListWorkers() const;
   void ListImages() const;
   void UploadImage(const string &imagePath) const;
+  void ListWorkersImages() const;
+  void UploadImageWorker(const vector<string> &elems) const;
 };
 
 
