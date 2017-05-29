@@ -1,4 +1,5 @@
 from subprocess import Popen, PIPE, call, DEVNULL
+from colored import fg, bg, attr
 import os
 
 adminExecutable = './bin/admin'
@@ -11,14 +12,38 @@ def runServer(*args):
 def runWorker(*args):
     return Popen([workerExecutable,*args], stdout=DEVNULL, stderr=DEVNULL)
 
+def test0():
+    inst = []
+    inst.append(runServer('-a', 'localhost'))
+    inst.append(runWorker('-a', 'localhost'))
+    inst.append(runWorker('-a', 'localhost'))
+    inst.append(runWorker('-a', 'localhost'))
+
+    p = Popen([adminExecutable, '-a', 'localhost', '-l', '-d'],stdout=PIPE)
+    out = p.communicate()
+    out = out[0].decode()
+
+    expectedOut='''
+0 -> 127.0.0.1
+1 -> 127.0.0.1
+2 -> 127.0.0.1
+'''
+
+    for i in inst:
+        i.kill()
+
+    lines1 = [l.strip() for l in out.strip().split('\n')         if l.strip()!='']
+    lines2 = [l.strip() for l in expectedOut.strip().split('\n') if l.strip()!='']
+    return lines1 == lines2
+
 def test1():
     inst = []
-    inst.append(runServer())
-    inst.append(runWorker())
-    inst.append(runWorker())
-    inst.append(runWorker())
+    inst.append(runServer('-a', '::1'))
+    inst.append(runWorker('-a', '::1'))
+    inst.append(runWorker('-a', '::1'))
+    inst.append(runWorker('-a', '::1'))
 
-    p = Popen([adminExecutable, 'localhost', '-l', '-d'],stdout=PIPE)
+    p = Popen([adminExecutable, '-a', '::1', '-l', '-d'],stdout=PIPE)
     out = p.communicate()
     out = out[0].decode()
 
@@ -37,9 +62,9 @@ def test1():
 
 if __name__ == "__main__":
     print("running tests")
-    tests = [test1]
+    tests = [test0, test1]
     for i,t in enumerate(tests):
         if not t():
-            print("test",i,"failed")
+            print ('%s Test %d failed %s' % (fg('red'), i, attr('reset')))
         else:
-            print("test",i,"passed")
+            print ('%s Test %d passed %s' % (fg('green'), i, attr('reset')))
