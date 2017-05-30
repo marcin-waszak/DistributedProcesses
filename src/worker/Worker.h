@@ -1,10 +1,14 @@
 #pragma once
 
 #include "../common/Connection.h"
+#include "Process.h"
+
+#include <map>
 
 class Worker {
     Connection server_connection_;
     std::vector<ProcessImage> process_images_;
+    std::map<string, std::unique_ptr<Process>> processes_;
     fs::path images_path_;
 
 public:

@@ -68,3 +68,21 @@ string AdminServerConnection::DeleteImageWorker(string imageName, string workerI
     SendMsg(workerId);
     return RecvMsg();
 }
+
+string AdminServerConnection::RunNow(string imageName, string workerId) {
+    boost::trim(imageName);
+    boost::trim(workerId);
+    SendMsg("RUN_NOW");
+    SendMsg(imageName);
+    SendMsg(workerId);
+    return RecvMsg();
+}
+
+string AdminServerConnection::StopNow(string imageName, string workerId) {
+    boost::trim(imageName);
+    boost::trim(workerId);
+    SendMsg("STOP_NOW");
+    SendMsg(imageName);
+    SendMsg(workerId);
+    return RecvMsg();
+}

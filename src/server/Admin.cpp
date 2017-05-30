@@ -145,6 +145,32 @@ bool Admin::ExecCmd() {
         } catch (boost::bad_lexical_cast) {
             connection_->SendMsg("Wrong worker id.");
         }
+    } else if (msg == "RUN_NOW") {
+        string name = connection_->RecvMsg();
+        string worker_id_str = connection_->RecvMsg();
+        try {
+            int worker_id = boost::lexical_cast<int>(worker_id_str);
+            auto worker = server_.GetWorker(worker_id);
+            string resp = worker->RunNow(name);
+            connection_->SendMsg(resp);
+        } catch (ServerExeption) {
+            connection_->SendMsg("Such worker does not exist.");
+        } catch (boost::bad_lexical_cast) {
+            connection_->SendMsg("Wrong worker id.");
+        }
+    } else if (msg == "STOP_NOW") {
+        string name = connection_->RecvMsg();
+        string worker_id_str = connection_->RecvMsg();
+        try {
+            int worker_id = boost::lexical_cast<int>(worker_id_str);
+            auto worker = server_.GetWorker(worker_id);
+            string resp = worker->StopNow(name);
+            connection_->SendMsg(resp);
+        } catch (ServerExeption) {
+            connection_->SendMsg("Such worker does not exist.");
+        } catch (boost::bad_lexical_cast) {
+            connection_->SendMsg("Wrong worker id.");
+        }
     } else if (msg == "CLOSE") {
         closed_ = true;
         return false;

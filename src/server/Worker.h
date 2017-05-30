@@ -29,6 +29,8 @@ public:
     string ListImages();
     string UploadImage(ProcessImage);
     string DeleteImage(ProcessImage);
+    string RunNow(string);
+    string StopNow(string);
     string GetAddress()const;
 
     bool Closed();

@@ -143,7 +143,7 @@ bool Connection::Connect() {
     Log::Info("Connecting to: %s",address_.c_str());
     if (connect(socked_fd_, (struct sockaddr *)&sa, sizeof sa) == -1) {
         Log::PutError("connect failed");
-        exit(1); // TODO: is exit apropriate here?
+        // exit(1); // TODO: is exit apropriate here?
         if(close(socked_fd_) == -1)
             Log::PutError("close failed");
         valid_ = false;

@@ -128,6 +128,12 @@ void Admin::ParseCommand(string command) {
   else if (cmd == "delete_image_worker") {
     DeleteImageWorker(elems);
   }
+  else if (cmd == "run_now") {
+    RunNow(elems);
+  }
+  else if (cmd == "stop_now") {
+    StopNow(elems);
+  }
   else {
     Log::Info("Invalid command: %s", command.c_str());
   }
@@ -174,4 +180,19 @@ void Admin::DeleteImageWorker(const vector<string> &elems) const {
     return;
   }
   Log::Out(connection_->DeleteImageWorker(elems[1], elems[2]).c_str());
+}
+
+void Admin::RunNow(const vector<string> &elems) const {
+  if (elems.size() != 3) {
+    Log::Error("Wrong arguments count");
+    return;
+  }
+  Log::Out(connection_->RunNow(elems[1], elems[2]).c_str());
+}
+void Admin::StopNow(const vector<string> &elems) const {
+  if (elems.size() != 3) {
+    Log::Error("Wrong arguments count");
+    return;
+  }
+  Log::Out(connection_->StopNow(elems[1], elems[2]).c_str());
 }

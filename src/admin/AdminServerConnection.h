@@ -20,6 +20,8 @@ public:
     string GetWorkersImages();
     string UploadImageWorker(string imageName, string workerId);
     string DeleteImageWorker(string imageName, string workerId);
+    string RunNow(string imageName, string workerId);
+    string StopNow(string imageName, string workerId);
 
     bool Close() override;
 };

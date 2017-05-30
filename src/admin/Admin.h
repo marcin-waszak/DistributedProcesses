@@ -46,6 +46,8 @@ private:
   void UploadImageWorker(const vector<string> &elems) const;
   void DeleteImage(const vector<string> &elems) const;
   void DeleteImageWorker(const vector<string> &elems) const;
+  void RunNow(const vector<string> &elems) const;
+  void StopNow(const vector<string> &elems) const;
 };
 
 
