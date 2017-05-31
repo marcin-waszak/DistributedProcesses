@@ -3,7 +3,7 @@
 bool Log::Enable = true;
 
 int main(int argc, char** argv) {
-    Server server;
+    Srv::Server server;
 
     server.GetArguments(argc, argv);
 

@@ -14,4 +14,6 @@ public:
     ProcessImage(const fs::path path);
     std::vector<char> GetBytes()const;
     fs::path GetPath()const { return file_path_; }
+
+    std::string GetName()const { return file_path_.filename().string(); }
 };

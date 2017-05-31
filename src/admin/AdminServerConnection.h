@@ -1,5 +1,4 @@
 #pragma once
-#include "Worker.h"
 #include "../common/Connection.h"
 
 #include <vector>
@@ -7,6 +6,8 @@
 
 using std::vector;
 using std::shared_ptr;
+
+namespace Adm {
 
 class AdminServerConnection : public Connection {
 public:
@@ -20,6 +21,10 @@ public:
     string GetWorkersImages();
     string UploadImageWorker(string imageName, string workerId);
     string DeleteImageWorker(string imageName, string workerId);
+    string RunNow(string imageName, string workerId);
+    string StopNow(string imageName, string workerId);
 
     bool Close() override;
 };
+
+}

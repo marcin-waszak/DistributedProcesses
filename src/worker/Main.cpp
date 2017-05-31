@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
         ("help,h", "print help message")
         ("images-path,i", po::value<string>()->default_value("_worker_images"),
          "relative path to directory with process images")
-        ("server-addr", po::value<string>()->default_value("localhost"), "server address (ipv4 or ipv6)")
+        ("server-addr,a", po::value<string>()->default_value("localhost"), "server address (ipv4 or ipv6)")
         ("server-port,p", po::value<int>()->default_value(1100), "server port");
     po::positional_options_description pd;
     pd.add("server-addr", 1);
@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Worker worker(vm["server-addr"].as<string>(),
+    Work::Worker worker(vm["server-addr"].as<string>(),
                   vm["server-port"].as<int>(),
                   vm["images-path"].as<string>());
     if (worker.WorkerLoop()) {

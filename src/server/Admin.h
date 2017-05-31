@@ -7,6 +7,8 @@ using std::thread;
 using std::unique_ptr;
 using std::make_unique;
 
+namespace Srv {
+
 class Server;
 
 class Admin {
@@ -23,3 +25,5 @@ public:
 
     bool Closed();
 };
+
+}

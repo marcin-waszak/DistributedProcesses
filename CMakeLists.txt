@@ -29,7 +29,8 @@ target_link_libraries (server pthread)
 
 target_link_libraries (worker Connection)
 target_link_libraries (worker ProcessImage)
-target_link_libraries (worker Worker1)
+target_link_libraries (worker Worker)
+target_link_libraries (worker Process)
 target_link_libraries (worker boost_program_options)
 target_link_libraries (worker boost_system)
 
