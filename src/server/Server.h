@@ -60,6 +60,7 @@ public:
   vector<ProcessImage> GetProcessImages()const;
   fs::path GetImagesPath() { return images_path_; }
   void AddProcessImage(ProcessImage);
+  void RemoveProcessImage(fs::path);
 
   vector<int> GetAdminIDs()const;
   vector<int> GetWorkerIDs()const;

@@ -33,6 +33,13 @@ string AdminServerConnection::UploadImage(string imagePath) {
     return RecvMsg();
 }
 
+string AdminServerConnection::DeleteImage(string imageName) {
+    boost::trim(imageName);
+    SendMsg("DELETE_IMAGE");
+    SendMsg(imageName);
+    return RecvMsg();
+}
+
 string AdminServerConnection::GetWorkersImages() {
     SendMsg("GET_WORKERS_IMAGES");
     return RecvMsg();
@@ -48,6 +55,15 @@ string AdminServerConnection::UploadImageWorker(string imageName, string workerI
     boost::trim(imageName);
     boost::trim(workerId);
     SendMsg("UPLOAD_IMAGE_WORKER");
+    SendMsg(imageName);
+    SendMsg(workerId);
+    return RecvMsg();
+}
+
+string AdminServerConnection::DeleteImageWorker(string imageName, string workerId) {
+    boost::trim(imageName);
+    boost::trim(workerId);
+    SendMsg("DELETE_IMAGE_WORKER");
     SendMsg(imageName);
     SendMsg(workerId);
     return RecvMsg();

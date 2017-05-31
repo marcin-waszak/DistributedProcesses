@@ -34,6 +34,9 @@ void Worker::Loop() {
             } else if (msg == "UPLOAD_IMAGE_RESPONSE") {
                 result_ = connection_->RecvMsg();
                 response_.unlock();
+            } else if (msg == "DELETE_IMAGE_RESPONSE") {
+                result_ = connection_->RecvMsg();
+                response_.unlock();
             } else if (msg == "WORKER_ERROR") {
                 std::cout << "Worker raised error" << endl;
                 // TODO
@@ -72,6 +75,22 @@ string Worker::UploadImage(ProcessImage p) {
       connection_->SendProcessImage(p);
     } catch (ConnectionException) {
       closed_ = true;
+    }
+    if (closed_)
+        return res;
+    response_.lock();
+    res = result_;
+    return res;
+}
+
+string Worker::DeleteImage(ProcessImage p) {
+    std::lock_guard<std::mutex> lock(access_);
+    string res = "error";
+    try {
+        connection_->SendMsg("DELETE_IMAGE");
+        connection_->SendMsg(p.GetPath().filename().string());
+    } catch (ConnectionException) {
+        closed_ = true;
     }
     if (closed_)
         return res;
