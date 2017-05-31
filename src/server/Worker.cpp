@@ -7,6 +7,8 @@ using std::cerr;
 using std::cout;
 using std::endl;
 
+namespace Srv {
+
 Worker::Worker(unique_ptr<Connection> connection, Server& server)
         : connection_(std::move(connection)),
         server_(server),
@@ -35,6 +37,12 @@ void Worker::Loop() {
                 result_ = connection_->RecvMsg();
                 response_.unlock();
             } else if (msg == "DELETE_IMAGE_RESPONSE") {
+                result_ = connection_->RecvMsg();
+                response_.unlock();
+            } else if (msg == "RUN_NOW_RESPONSE") {
+                result_ = connection_->RecvMsg();
+                response_.unlock();
+            } else if (msg == "STOP_NOW_RESPONSE") {
                 result_ = connection_->RecvMsg();
                 response_.unlock();
             } else if (msg == "WORKER_ERROR") {
@@ -99,10 +107,44 @@ string Worker::DeleteImage(ProcessImage p) {
     return res;
 }
 
+string Worker::RunNow(string p) {
+    std::lock_guard<std::mutex> lock(access_);
+    string res = "error";
+    try {
+      connection_->SendMsg("RUN_NOW");
+      connection_->SendMsg(p);
+    } catch (ConnectionException) {
+      closed_ = true;
+    }
+    if (closed_)
+        return res;
+    response_.lock();
+    res = result_;
+    return res;
+}
+
+string Worker::StopNow(string p) {
+    std::lock_guard<std::mutex> lock(access_);
+    string res = "error";
+    try {
+      connection_->SendMsg("STOP_NOW");
+      connection_->SendMsg(p);
+    } catch (ConnectionException) {
+      closed_ = true;
+    }
+    if (closed_)
+        return res;
+    response_.lock();
+    res = result_;
+    return res;
+}
+
 bool Worker::Closed() {
     return closed_;
 }
 
 string Worker::GetAddress()const {
     return connection_->GetAddress();
+}
+
 }

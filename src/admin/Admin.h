@@ -24,6 +24,8 @@ using std::cin;
 using std::unique_ptr;
 using std::make_unique;
 
+namespace Adm {
+
 class Admin {
 public:
   void GetArguments(int argc, char** argv);
@@ -46,7 +48,10 @@ private:
   void UploadImageWorker(const vector<string> &elems) const;
   void DeleteImage(const vector<string> &elems) const;
   void DeleteImageWorker(const vector<string> &elems) const;
+  void RunNow(const vector<string> &elems) const;
+  void StopNow(const vector<string> &elems) const;
 };
 
+}
 
 #endif //PROMAN_ADMIN_H

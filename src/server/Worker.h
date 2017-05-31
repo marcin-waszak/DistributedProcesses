@@ -9,6 +9,8 @@ using std::mutex;
 using std::unique_ptr;
 using std::make_unique;
 
+namespace Srv {
+
 class Server;
 
 class Worker {
@@ -29,7 +31,11 @@ public:
     string ListImages();
     string UploadImage(ProcessImage);
     string DeleteImage(ProcessImage);
+    string RunNow(string);
+    string StopNow(string);
     string GetAddress()const;
 
     bool Closed();
 };
+
+}
