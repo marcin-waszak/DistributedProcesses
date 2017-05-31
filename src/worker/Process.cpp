@@ -1,5 +1,7 @@
 #include "Process.h"
 
+namespace Work {
+
 Process::Process(ProcessImage pi)
     : image_(pi), should_be_running_(false) {
 }
@@ -18,4 +20,6 @@ bool Process::RunNow() {
 bool Process::StopNow() {
     should_be_running_ = 0;
     return true;
+}
+
 }

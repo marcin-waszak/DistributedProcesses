@@ -2,6 +2,8 @@
 
 #include "../common/ProcessImage.h"
 
+namespace Work {
+
 class Process {
     ProcessImage image_;
     bool should_be_running_;
@@ -13,3 +15,5 @@ public:
     bool RunNow();
     bool StopNow();
 };
+
+}
