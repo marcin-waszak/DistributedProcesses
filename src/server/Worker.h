@@ -9,6 +9,8 @@ using std::mutex;
 using std::unique_ptr;
 using std::make_unique;
 
+namespace Srv {
+
 class Server;
 
 class Worker {
@@ -35,3 +37,5 @@ public:
 
     bool Closed();
 };
+
+}

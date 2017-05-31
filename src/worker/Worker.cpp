@@ -6,6 +6,8 @@
 #include <chrono>
 #include <thread>
 
+namespace Work {
+
 Worker::Worker(const string& addr,int port, fs::path images_path):
     server_connection_(addr,port), images_path_(images_path) {
     if (!fs::exists(images_path_)) {
@@ -143,4 +145,6 @@ bool Worker::WorkerLoop() {
         }
     }
     return true;
+}
+
 }

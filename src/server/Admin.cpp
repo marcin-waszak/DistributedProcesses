@@ -6,6 +6,8 @@ using std::cerr;
 using std::cout;
 using std::endl;
 
+namespace Srv {
+
 Admin::Admin(unique_ptr<Connection> connection, Server& server)
         : connection_(std::move(connection)),
         server_(server),
@@ -182,4 +184,6 @@ bool Admin::ExecCmd() {
 
 bool Admin::Closed() {
     return closed_;
+}
+
 }

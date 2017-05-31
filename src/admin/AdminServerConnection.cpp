@@ -3,6 +3,7 @@
 #include <iostream>
 #include <boost/algorithm/string.hpp>
 
+namespace Adm {
 
 AdminServerConnection::AdminServerConnection(const string& address, int port)
     : Connection(address, port) {
@@ -85,4 +86,6 @@ string AdminServerConnection::StopNow(string imageName, string workerId) {
     SendMsg(imageName);
     SendMsg(workerId);
     return RecvMsg();
+}
+
 }

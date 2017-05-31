@@ -24,6 +24,8 @@ using std::cin;
 using std::unique_ptr;
 using std::make_unique;
 
+namespace Adm {
+
 class Admin {
 public:
   void GetArguments(int argc, char** argv);
@@ -50,5 +52,6 @@ private:
   void StopNow(const vector<string> &elems) const;
 };
 
+}
 
 #endif //PROMAN_ADMIN_H

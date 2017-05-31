@@ -9,7 +9,7 @@ using std::string;
 bool Log::Enable = true;
 
 int main(int argc, char* argv[]) {
-    Admin admin;
+    Adm::Admin admin;
 
     admin.GetArguments(argc, argv);
     admin.Connect();

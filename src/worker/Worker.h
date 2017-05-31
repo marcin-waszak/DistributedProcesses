@@ -5,6 +5,8 @@
 
 #include <map>
 
+namespace Work {
+
 class Worker {
     Connection server_connection_;
     std::vector<ProcessImage> process_images_;
@@ -16,3 +18,5 @@ public:
     void ExecCmd(const string&);
     bool WorkerLoop();
 };
+
+}

@@ -7,6 +7,8 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+namespace Adm {
+
 void Admin::GetArguments(int argc, char **argv) {
   po::options_description desc("Allowed options");
   desc.add_options()
@@ -195,4 +197,6 @@ void Admin::StopNow(const vector<string> &elems) const {
     return;
   }
   Log::Out(connection_->StopNow(elems[1], elems[2]).c_str());
+}
+
 }

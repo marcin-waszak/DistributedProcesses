@@ -40,6 +40,8 @@ using std::vector;
 using std::mutex;
 using std::lock_guard;
 
+namespace Srv {
+
 class ServerExeption : public std::runtime_error {
 public:
     ServerExeption(std::string s)
@@ -84,3 +86,5 @@ private:
   int next_admin_id_;
   int next_worker_id_;
 };
+
+}

@@ -4,6 +4,8 @@
 
 #include "Server.h"
 
+namespace Srv {
+
 Server::Server()
     : next_admin_id_(0), next_worker_id_(0) {
 
@@ -198,4 +200,6 @@ shared_ptr<Worker> Server::GetWorker(int i)const {
   if (!workers_.count(i))
       throw ServerExeption("Get worker error.");
   return workers_.at(i);
+}
+
 }

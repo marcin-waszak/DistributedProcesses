@@ -7,6 +7,8 @@ using std::cerr;
 using std::cout;
 using std::endl;
 
+namespace Srv {
+
 Worker::Worker(unique_ptr<Connection> connection, Server& server)
         : connection_(std::move(connection)),
         server_(server),
@@ -143,4 +145,6 @@ bool Worker::Closed() {
 
 string Worker::GetAddress()const {
     return connection_->GetAddress();
+}
+
 }

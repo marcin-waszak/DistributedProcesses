@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Worker worker(vm["server-addr"].as<string>(),
+    Work::Worker worker(vm["server-addr"].as<string>(),
                   vm["server-port"].as<int>(),
                   vm["images-path"].as<string>());
     if (worker.WorkerLoop()) {
