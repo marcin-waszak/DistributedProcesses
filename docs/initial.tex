@@ -34,7 +34,7 @@
 \textsc{Politechnika Warszawska, WEiTI} \\ [25pt] % Your university, school and/or department name(s)
 \horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
 \huge pRoman - process manager \\
-\large Projekt TIN. Dokumentacja wstępna
+\large Projekt TIN. Dokumentacja końcowa
  \\ % The assignment title
 \horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
 }
@@ -51,15 +51,15 @@
 
 \maketitle % Print the title
 
-
-\section*{Treść zadania}
+\section{Projekt wstępny}
+\subsection{Treść zadania}
 
 W sieci jest zbiór zarządzanych węzłów, serwer zarządzający i stacja konsoli administratora. W węzłach pracują agenty zarządzające. Agent zarządzający może: załadować kod nowego procesu, usunąć kod procesu, uruchomić/zatrzymać/wznowić/zabić dany proces zgodnie z harmonogramem, wznowić proces nie raportujący swej żywotności, podać dane statystyczne serwerowi. System umożliwia administratorowi zarządzanie rozproszonymi procesami. System komunikacji powinien móc pracować w przestrzeni adresów \textit{IPv4} i \textit{IPv6}. Ponadto należy zaprojektować moduł do \textit{Wireshark} umożliwiający wyświetlanie i analizę zdefiniowanych komunikatów. 
 
 
-\section*{Przyjęte założenia funkcjonalne i niefunkcjonalne}
+\subsection{Przyjęte założenia funkcjonalne i niefunkcjonalne}
 
-\subsection*{Założenia funkcjonalne}
+\subsubsection*{Założenia funkcjonalne}
 Implementowany system ma umożliwiać: 
 \begin{itemize}
 \item wysyłanie obrazu procesu
@@ -72,7 +72,7 @@ Implementowany system ma umożliwiać:
 \item zabijanie danego procesu zgodnie z harmonogramem
 \end{itemize}
 
-\subsection*{Założenia niefunkcjonalne}
+\subsubsection*{Założenia niefunkcjonalne}
 \begin{itemize}
 \item niezawodność komunikacji dzięki użyciu protokołu TCP
 \item funkcja watchdoga chroniącego przed zawieszaniu się agenta
@@ -80,7 +80,7 @@ Implementowany system ma umożliwiać:
 \end{itemize}
 
 
-\section*{Podstawowe przypadki użycia}
+\subsection{Podstawowe przypadki użycia}
 Administrator - użytkownik zalogowany do konsoli administratorskiej
 \begin{longtable}{ |m{4.5cm}|m{3cm}|m{7.5cm}|}
  \caption{Podstawowe przypadki użycia}\\
@@ -149,17 +149,17 @@ Podgląd danych statystycznych & Administrator &
  \hline
 \end{longtable}
 
-\section*{Wybrane środowisko sprzętowo-programowe} 
+\subsection{Wybrane środowisko sprzętowo-programowe} 
 \begin{enumerate}
 \item System operacyjny: \textit{\textbf{GNU/Linux}}.
 \item Język: \textit{\textbf{C++}}.
-\item Biblioteki: STL, boost/filesystem, boost/process, BSD Sockets API.
-\item Testowanie: boost/test.
-\item Debugowanie: wireshark.
+\item Biblioteki: STL, boost/filesystem, boost/process, BSD Sockets API, GNU Readlines.
+\item Testowanie: python3.
+\item Debugowanie: GDB, Wireshark.
 \item Budowanie: cmake
 \end{enumerate}
 
-\section*{Architektura rozwiązania}
+\subsection{Architektura rozwiązania}
 \begin{figure}[H]
     \centering
     \def\svgwidth{0.5\columnwidth}
@@ -180,18 +180,18 @@ Planowane aplikacje sieciowe do wykonania:
 \item aplikacja klasy administrator
 \end{itemize}
 
-\section*{API modułów stanowiących bloki funkcjonalne}
+\subsection{API modułów stanowiących bloki funkcjonalne}
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=.25]{tin.eps}
 	\caption{Wstępny diagram klas}
 \end{figure}
 
-\section*{Sposób testowania} 
+\subsection{Sposób testowania} 
 Planujemy użyć testów jednostkowych w poszczególnych aplikacjach naszego projektu, żeby sprawdzić poprawność działania osobnych części całego systemu. Poza testami jednostkowymi napisane będą również testy integracyjne. Przewidujemy rownież testowanie ręczne. Scenariusze testów akceptacyjnych są przedstawione poniżej.
 
 \newpage
-\section*{Scenariusze testów akceptacyjnych}
+\subsection{Scenariusze testów akceptacyjnych}
 Testy akceptacyjne będą polegały na wykonywaniu różnych scenariuszy użycia.
 
 \begin{longtable}{ |m{4.0cm}|m{5.5cm}|m{6.0cm}|}
@@ -222,7 +222,7 @@ Jeśli podane id istnieje, obraz procesu zostanie usunięty, w przeciwnym przypa
  Podgląd danych statystycznych & Administrator wpisuje polecenie służące do podglądu danych statystycznych serwera. & Wyświetlone zostaną informacje o obciążeniu węzłów, liczbie uruchomionych procesów, liczbie załadowanych procesów etc.\\
   \hline
 \end{longtable}
-\section*{Podział prac w zespole}
+\subsection{Podział prac w zespole}
 \textbf{Damian:} projekt architektury \\
 \textbf{Michał:} projekt architektury \\
 \textbf{Agata:} projekt architektury, dokumentacja, testowanie, moduł Wireshark \\
@@ -230,7 +230,7 @@ Jeśli podane id istnieje, obraz procesu zostanie usunięty, w przeciwnym przypa
 
 Powyższy podział jest zgrubny. Bowiem szczegółowe przydzielanie prac zorganizowane zostało za pomocą systemu tasków na platformie GitHub.
 
-\section*{Harmonogram prac}
+\subsection{Harmonogram prac}
 \begin{itemize}
 \item \textbf{19.04} - oddanie dokumentacji wstępnej. 
 \item \textbf{30.04} - szkielet programów: serwera, workera oraz administratora;  rozpoczęte prace nad skryptami testującymi. 
@@ -239,7 +239,7 @@ Powyższy podział jest zgrubny. Bowiem szczegółowe przydzielanie prac zorgani
 \item \textbf{31.05} - oddanie projektu.
 \end{itemize}
 
-\section*{Adres projektu na serwerze kontroli wersji}
+\subsection{Adres projektu na serwerze kontroli wersji}
 \url{https://github.com/marcin-waszak/DistributedProcesses}  \\
 
 W zakadce \textit{Issues} można przeglądać informacje o przydzielanych przez Marcina zadaniach: 
@@ -248,4 +248,140 @@ W zakadce \textit{Issues} można przeglądać informacje o przydzielanych przez 
 \item kiedy zostało utworzone
 \item na jakim etapie realizacji obecnie jest
 \end{itemize}
+\section{Ilustracja i opis struktury implementacyjnej systemu}
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=.45]{class.png}
+	\caption{Diagram klas}
+\end{figure}
+\section{Definicje komunikatów}
+\subsection*{Struktura i sposób ich kodowania}
+Każdy pakiet przesyłany pomiędzy modułami systemu składa się z:
+\begin{itemize}
+\item długości komendy - 4 bajty
+\item metody
+\item długości danych - 4 bajty
+\item dane
+\end{itemize}
+Przy czym dwa ostanie elementy mogą występować wielokrotnie. Wewnętrznie system za każdym razem wysyła długość danych do odebrania i daną. Przy czym komenda jest w tym rozumieniu specjalnym rodzajem danej. Przykładowo komunikat \textbf{UPLOAD\_IMAGE abcd} będzie skutkował wysłaniem pakietu (pomijając opakowanie w warstwę transportową itd.):
+\textbf{12UPLOAD\_IMAGE4abcd}.
+\subsection*{Określenie kto jakie komunikaty odbiera i wysyła}
+Wyróżniono następujące komunikaty:
+\begin{itemize}
+\item Wysyłane ze stacji administratora do serwera:
+	\begin{itemize}
+    \item \textbf{ADMIN} - nawiązanie połączenia z serwerem, serwer od momentu otrzymania takiego komunikatu identyfikuje administratora
+    \item \textbf{GET\_WORKERS} - serwer zwraca administorowi listę dostępnych stacji wykonawczych (workers)
+    \item \textbf{GET\_IMAGES\_LIST} - serwer zwraca administorowi listę obrazów procesów zapisanych na serwerze
+    \item \textbf{UPLOAD\_IMAGE} - administrator udostępnia obraz procesu na serwer - obraz zostaje zapisany na serwerze (wymaga wysłania obrazu procesu po wysłaniu tego komunikatu).
+    \item \textbf{DELETE\_IMAGE} - administrator wywołując tę komendę może usunąć obraz o podanej nazwie z serwera (wymaga wysłania nazwy obrazu po wysłaniu tego komunikatu).
+    \item \textbf{RUN\_NOW} - uruchomienie procesu z obrazu na workerze (nazwa obrazu procesu i ID workera wysyłane po tym komunikacie)
+    \item \textbf{STOP\_NOW} - zatrzymanie wykonywania procesu na workerze (nazwa obrazu procesu i ID workera wysyłane po tym komunikacie)
+    \item \textbf{GET\_WORKERS\_IMAGES} - serwer zwraca administorowi listę obrazów procesów wysłanych do workera o identyfikatorze wysłanym po wysłaniu tego komunikatu
+    \item \textbf{UPLOAD\_IMAGE\_WORKER} - przesłanie obrazu z serwera do workera - wymaga wysłania nazwy obrazu oraz identyfikatora workera do którego obraz ma zostać wysłany
+    \item \textbf{DELETE\_IMAGE\_WORKER} - usunięcie obrazu z przestrzeni dyskowej workera - wymaga podania nazwy obrazu oraz identyfikatora workera
+    \item \textbf{RUN\_SHEDULE} - zaplanowanie uruchomienia procesu z danego obrazu o danym czasie w ciągu doby na danym workerze
+	\item \textbf{RUN\_SHEDULE} - zaplanowanie zatrzymania procesu z danego obrazu o danym czasie w ciągu doby na danym workerze
+	\item \textbf{CLEAR\_SHEDULE} - wyczyszczenie planu uruchamiania i zatrzymowania procesu na danym workerze
+	\item \textbf{GET\_SHEDULE} - pokazanie planu uruchamiania i zatrzymowania procesu na danym workerze
+
+    \item \textbf{CLOSE} - zamyka połączenie pomiędzy administratorem a serwerem
+    \end{itemize}    
+\item Wysyłane z serwera do workera:
+  \begin{itemize}
+  \item \textbf{GET\_IMAGES\_LIST} - zwraca listę obrazów wysłanych do danego workera.
+  \item \textbf{UPLOAD\_IMAGE} - wysłanie obrazu z serwera do workera
+  \item \textbf{DELETE\_IMAGE} - usunięcie obrazu z workera
+  \item \textbf{RUN\_NOW} - uruchomienie procesu na workerze (nazwa obrazu wysyłana po tym komunikacie)
+  \item \textbf{STOP\_NOW} - zatrzymanie obrazu na workerze (nazwa obrazu wysyłana po tym komunikacie)
+  \item \textbf{RUN\_SHEDULE} - zaplanowanie uruchomienia procesu z danego obrazu o danym czasie w ciągu doby
+  \item \textbf{RUN\_SHEDULE} - zaplanowanie zatrzymania procesu z danego obrazu o danym czasie w ciągu doby
+  \item \textbf{CLEAR\_SHEDULE} - wyczyszczenie planu uruchamiania i zatrzymowania procesu
+  \item \textbf{GET\_SHEDULE} - pokazanie planu uruchamiania i zatrzymowania procesu
+\end{itemize}
+\item Wysyłane z workera do serwera:
+	\begin{itemize}
+	\item \textbf{WORKER} - nawiązanie połączenia między workerem a serwerem
+    \item \textbf{GET\_IMAGES\_LIST\_RESPONSE} - odpowiedź na komunikat \textbf{GET\_IMAGES\_LIST}
+    \item \textbf{UPLOAD\_IMAGE\_RESPONSE} - odpowiedź na komunikat \textbf{UPLOAD\_IMAGE}
+    \item \textbf{DELETE\_IMAGE\_RESPONSE} - odpowiedź na komunikat \textbf{DELETE\_IMAGE}
+    \item \textbf{RUN\_NOW\_RESPONSE} - odpowiedź na komunikat \textbf{RUN\_NOW}
+    \item \textbf{STOP\_NOW\_RESPONSE} - odpowiedź na komunikat \textbf{STOP\_NOW}
+    \item \textbf{RUN\_SHEDULE\_RESPONSE} - odpowiedź na \textbf{RUN\_SHEDULE}
+	\item \textbf{RUN\_SHEDULE\_RESPONSE} - odpowiedź na \textbf{RUN\_SHEDULE}
+	\item \textbf{CLEAR\_SHEDULE\_RESPONSE} -odpowiedź na \textbf{CLEAR\_SHEDULE}
+	\item \textbf{GET\_SHEDULE\_RESPONSE} - odpowiedź na \textbf{GET\_SHEDULE}
+  	\end{itemize}
+\end{itemize}
+\section{Wnioski z wykonanego testowania}
+Dzięki przeprowadzonemu testowaniu mamy pewność, że:
+\begin{itemize}
+\item komunikacja między administratorem, workerem a serwerem z oparciem gniazd BSD została zrealizowana poprawnie.
+\item w przypadku przerwania połączenia internetowego utracone zostaje
+połączenie pomiędzy workerem a serwerem.
+\item na podstawie wskazań w programie wireshark oraz porównaniu
+rozmiaru wysłanych danych, wyniki okazują się być zgodne z założeniami. Świadczy to o dobrej implementacji programu nasłuchującego, a także o poprawnym działaniu analizatora ruchu.
+\end{itemize}
+\section{Instrukcja instalacji stworzonego systemu}
+Jako zespół do zbudowania projektu używaliśmy środowiska CLion. W takim przypadku wystarczy tylko kliknąć przycisk \textit{\textquotedblleft  Run\textquotedblright} i projekt będzie gotowy do uruchomienia. Dane środowisko pomaga także w automatycznym uruchamianiu testów: \textit{\textquotedblleft  run\_acceptance\_tests.py\textquotedblright}.  
+\newline Zaimplemetowane przez nas rozwiązanie równie dobrze można zbudować \textquotedblleft  ręcznie\textquotedblright poprzez wykonanie następującej sekwencji poleceń:
+\begin{enumerate}
+\item mkdir build
+\item cd build
+\item cmake ..
+\item make
+\end{enumerate}
+Po zbudowaniu zgodnie z instrukcją, należy przejść do katalogu 
+\newline \textquotedblleft \textit{/DistributedProcesses/bin} \textquotedblright
+\newline i poleceniem \textquotedblleft \textit{/server -a \textbf{[tu należy podać adres ip]}} \textquotedblright uruchomić serwer.
+\newline Admin i worker uruchamiają się analogicznie. W razie wątpliwości można dodać flagę \textit{\textbf{-h}}, sprawi ona, że w oknie terminala pojawią się wskazówki dotyczące dostępnych trybów działania programu oraz możliwych opcji do wykorzystania.
+\section{Podsumowanie}
+\subsection{Wyciągnięte doświadczenia}
+\paragraph*{Komunikacja sieciowa.}
+Przede wszystkim stworzony system pozwolił nam nauczyć się wielu zagadnień w zakresie
+komunikacji sieciowej. Po raz kolejny upewniliśmy się jak ważne są testy jednostkowe oraz integracyjne. Mieliśmy możliwość zapoznać się z tworzeniem skryptów LUA. 
+Dany projekt dał nam dodatkową możliwość poćwiczyć techniki pisania czystego i działającego kodu. 
+\paragraph*{Github.} 
+Bez systemu kontroli wersji \textbf{github} realizacja projektu byłaby niemożliwa. Tworzenie zadanego systemu jest czasochłonne, powstaje przy tym dużo różnych wersji programu. Warto, żeby każdy członek zespołu  od samego początku w szczegółach zapoznał się ze strukturą zdalnego repozytorium oraz jego obsługą. W przypadku naszego zespołu oprócz kontroli wersji i code review, została wykorzystana również funkcja Issues do przydziału przez Marcina poszczególnych zadań członkom zespołu. Pozwoliło to na bieżąco śledzić proces wykonania przydzielonych zadań. 
+\paragraph*{Umiejętności miękkie.}
+Kolejnym punktem, który warto wymienić jest dobra dokumentacja wstępna oraz w miarę równomierny podział obowiązków. W przypadku odłożenia projektu na czas późniejszy, jego wykonanie nie byłoby możliwe jak również jeśliby cały projekt miała zrealizować jedna osoba. Tworząc coś wspólnego nauczyliśmy się współpracować ze sobą. Marcin sprawdził się jako lider zespołu.
+
+\subsection{Rozmiar plików} 
+Dokładne statystyki dotyczące rozmiarów plików udało się uzyskać przy pomocy wtyczki Statistic w środowisku CLion (produkcja JBrains). 
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=.35]{Statistics.png}
+	\caption{Statystyki rozmiaru projektu}
+\end{figure}
+\subsection{Oszacowanie czasu pracy}
+\begin{longtable}{ |m{8.0cm}|m{3.5cm}|}
+ \caption{Oszacowanie liczby godzin pracy nad projektem}\\
+ \hline
+CEL & LICZBA GODZIN \\
+ \hline
+ \endfirsthead
+ \multicolumn{2}{c}%
+{\tablename\ \thetable\ -- \textit{Kontynuacja z poprzedniej strony}} \\
+\hline
+CEL & LICZBA GODZIN [h]\\
+ \hline
+ \endhead
+ \hline \multicolumn{2}{r}{\textit{Kontynuacja na następnej stronie}} \\
+ \endfoot
+ \hline
+ \endlastfoot
+ Zapoznanie się z dokumentacją techniczną BSD & 20 \\
+ \hline
+ Projektowanie systemu & 30 \\
+ \hline
+ Implementacja & 100 \\
+ \hline
+ Testowanie & 30 \\
+ \hline
+ Naprawa błędów & 50 \\
+ \hline
+ \textbf{Razem} & ok. 230 \\
+ \hline
+ \end{longtable}
+
 \end{document}
