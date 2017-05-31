@@ -1,5 +1,4 @@
 #pragma once
-#include "Worker.h"
 #include "../common/Connection.h"
 
 #include <vector>
