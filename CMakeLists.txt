@@ -33,6 +33,7 @@ target_link_libraries (worker Worker)
 target_link_libraries (worker Process)
 target_link_libraries (worker boost_program_options)
 target_link_libraries (worker boost_system)
+target_link_libraries (worker pthread)
 
 # TODO: server, worker
 # TODO: move link_libraries somewhoere to subdirectory
