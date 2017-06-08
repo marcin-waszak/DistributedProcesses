@@ -4,6 +4,8 @@
 #include <iostream>
 
 
+namespace bf = boost::filesystem;
+
 static std::vector<char> ReadAllBytes(char const* filename)
 {
     std::ifstream ifs(filename, std::ios::binary|std::ios::ate);
